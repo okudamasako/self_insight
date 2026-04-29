@@ -28,12 +28,9 @@ export default async function handler(req, res) {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        inputs: {},
-        query,
-        response_mode: 'blocking',
-        user: 'self-insight-user'
-      })
-    });
+  query: query,
+  user: 'self-insight-user'
+})
 
     const data = await response.json();
 
