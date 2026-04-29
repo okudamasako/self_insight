@@ -800,7 +800,7 @@ if (organizeBtn) {
     } catch (error) {
       // エラーが起きた場合は、エラー内容を画面に表示します
       console.error(error);
-      outputText.textContent = '【エラーが発生しました】\n' + error.message + '\n\n※Dify APIの設定（キー等）またはローカルサーバーの起動状況をご確認ください。';
+      outputText.textContent = '【エラーが発生しました】\n' + error.message + '\n\n※APIの設定（キー等）またはローカルサーバーの起動状況をご確認ください。';
     } finally {
       // 5. 処理が終わったら、ボタンを元の状態に戻します
       this.disabled = false;
