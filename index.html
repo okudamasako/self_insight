@@ -770,7 +770,7 @@ if (organizeBtn) {
       output.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } catch (error) {
       console.error(error);
-      outputText.textContent = 'OpenAI連携の準備がまだ完了していないため、回答を生成できませんでした。\n\nこの画面を動かすには、サーバー側に /api/consult を用意し、OPENAI_API_KEY を環境変数に設定してください。';
+      outputText.textContent = '相談の生成に失敗しました。通信状況を確認して、少し時間をおいてからもう一度お試しください。';
     } finally {
       this.disabled = false;
       this.textContent = '気持ちを整理する';
