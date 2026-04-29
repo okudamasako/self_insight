@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>星命館 - 星座と数秘の性格診断</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;500&family=Zen+Kaku+Gothic+New:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Zen Kaku Gothic New', sans-serif;
+  background: linear-gradient(135deg, #1a0f2e 0%, #2d1f4a 40%, #1f2d4a 100%);
+  min-height: 100vh;
+  color: #f8f4ed;
+}
+
+.stars-bg {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none; z-index: 0;
+  background-image:
+    radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,0.6) 0%, transparent 100%),
+    radial-gradient(1px 1px at 60% 10%, rgba(255,255,255,0.4) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 80% 60%, rgba(255,255,255,0.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 35% 80%, rgba(255,255,255,0.3) 0%, transparent 100%),
+    radial-gradient(1px 1px at 90% 25%, rgba(255,255,255,0.6) 0%, transparent 100%),
+    radial-gradient(1px 1px at 10% 70%, rgba(255,255,255,0.4) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 50% 50%, rgba(255,255,255,0.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 75% 85%, rgba(255,255,255,0.3) 0%, transparent 100%);
+}
+
+.container {
+  position: relative; z-index: 1;
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 40px 24px;
+  line-height: 1.9;
+}
+
+.site-header { text-align: center; margin-bottom: 44px; }
+.logo-mark {
+  font-size: 48px; margin-bottom: 12px; display: block;
+  animation: float 3s ease-in-out infinite;
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.site-name {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 28px; font-weight: 300;
+  color: #e8d08a; letter-spacing: 0.3em;
+  text-shadow: 0 0 20px rgba(201,168,76,0.4);
+  margin-bottom: 8px;
+}
+.tagline { font-size: 13px; color: #b4a7d8; letter-spacing: 0.12em; }
+
+.card, .result-card {
+  background: rgba(30,18,50,0.75);
+  border: 1px solid rgba(201,168,76,0.32);
+  border-radius: 18px;
+  padding: 32px;
+  backdrop-filter: blur(12px);
+  margin-bottom: 24px;
+  box-shadow: 0 18px 50px rgba(0,0,0,0.18);
+}
+.card-title {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 16px; color: #c9a84c;
+  letter-spacing: 0.18em; margin-bottom: 24px;
+  text-align: center; font-weight: 400;
+}
+.form-group { margin-bottom: 20px; }
+.form-label {
+  display: block; font-size: 13px;
+  color: #b4a7d8; margin-bottom: 8px; letter-spacing: 0.1em;
+}
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.form-input {
+  width: 100%;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(201,168,76,0.2);
+  border-radius: 9px; color: #f8f4ed;
+  font-family: 'Zen Kaku Gothic New', sans-serif;
+  font-size: 16px; padding: 12px 14px;
+  outline: none;
+  transition: border-color 0.2s, background 0.2s;
+  -webkit-appearance: none; appearance: none;
+}
+.form-input:focus {
+  border-color: rgba(201,168,76,0.65);
+  background: rgba(255,255,255,0.1);
+}
+.form-input option { background: #2d1f4a; color: #f8f4ed; }
+.btn-primary, .btn-paid, .btn-consult {
+  width: 100%;
+  border: none; border-radius: 12px;
+  font-family: 'Noto Serif JP', serif;
+  font-size: 17px; font-weight: 500; padding: 16px;
+  cursor: pointer; letter-spacing: 0.16em;
+  transition: opacity 0.2s, transform 0.1s;
+}
+.btn-primary {
+  background: linear-gradient(135deg, #c9a84c, #e8d08a);
+  color: #1a0f2e; margin-top: 8px;
+}
+.btn-paid {
+  background: linear-gradient(135deg, #d4af37, #f1da8a);
+  color: #1a0f2e; margin-top: 22px;
+}
+.btn-consult {
+  background: linear-gradient(135deg, #d94f73, #e9899e);
+  color: white; margin-top: 20px; font-size: 15px;
+}
+button:hover { opacity: 0.92; transform: translateY(-1px); }
+button:active { transform: translateY(0); }
+button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.loading-area { text-align: center; padding: 20px 0; }
+.loading-spinner {
+  width: 40px; height: 40px;
+  border: 2px solid rgba(201,168,76,0.2);
+  border-top: 2px solid #c9a84c;
+  border-radius: 50%; margin: 0 auto 16px;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { font-size: 13px; color: #b4a7d8; letter-spacing: 0.1em; }
+.hidden { display: none; }
+.result-card { animation: fadeUp 0.6s ease forwards; }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.result-header {
+  text-align: center; margin-bottom: 28px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid rgba(201,168,76,0.15);
+}
+.result-person { font-size: 13px; color: #b4a7d8; letter-spacing: 0.13em; margin-bottom: 5px; }
+.result-title {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 24px; color: #e8d08a;
+  font-weight: 300; letter-spacing: 0.12em; margin-bottom: 6px;
+}
+.result-element {
+  display: inline-block; font-size: 12px; color: #b4a7d8;
+  border: 1px solid rgba(201,168,76,0.3);
+  border-radius: 20px; padding: 4px 14px;
+  margin-top: 8px; letter-spacing: 0.08em;
+}
+.summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 26px; }
+.summary-item {
+  background: rgba(255,255,255,0.045);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px; padding: 15px 16px;
+}
+.summary-label { font-size: 12px; color: #b4a7d8; letter-spacing: 0.08em; margin-bottom: 5px; }
+.summary-value { font-family: 'Noto Serif JP', serif; font-size: 17px; color: #f5d36a; }
+.section-title {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 14px; color: #c9a84c; letter-spacing: 0.18em; margin: 26px 0 12px;
+  display: flex; align-items: center; gap: 8px;
+}
+.section-title:first-of-type { margin-top: 0; }
+.section-title::before {
+  content: ''; display: block; width: 20px; height: 1px;
+  background: #c9a84c; flex-shrink: 0;
+}
+.result-text, .paid-text {
+  font-size: 14px; color: rgba(248,244,237,0.87);
+  line-height: 1.95; margin-bottom: 18px; letter-spacing: 0.02em;
+  white-space: pre-line;
+}
+.advice-box, .paid-box {
+  background: rgba(201,168,76,0.075);
+  border-left: 2px solid #c9a84c;
+  border-radius: 0 10px 10px 0;
+  padding: 17px 18px; margin-bottom: 22px;
+}
+.advice-text {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 14px; color: rgba(232,208,138,0.93);
+  line-height: 1.95; font-weight: 300;
+  white-space: pre-line;
+}
+.lucky-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 24px; }
+.lucky-item {
+  background: rgba(201,168,76,0.08);
+  border: 1px solid rgba(201,168,76,0.2);
+  border-radius: 9px; padding: 12px; text-align: center;
+}
+.lucky-label {
+  font-size: 11px; color: #b4a7d8;
+  letter-spacing: 0.08em; margin-bottom: 6px; display: block;
+}
+.lucky-value {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 16px; color: #f5d36a; font-weight: 500;
+}
+.paid-preview {
+  margin-top: 24px;
+  padding: 22px;
+  border-radius: 15px;
+  background: rgba(255,255,255,0.045);
+  border: 1px solid rgba(201,168,76,0.18);
+}
+#paidContent {
+  display: none;
+  margin-top: 30px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(201,168,76,0.18);
+}
+.btn-retry {
+  width: 100%; background: transparent;
+  border: 1px solid rgba(201,168,76,0.4);
+  border-radius: 12px; color: #b4a7d8;
+  font-family: 'Zen Kaku Gothic New', sans-serif;
+  font-size: 14px; padding: 14px; cursor: pointer;
+  letter-spacing: 0.1em; transition: border-color 0.2s, color 0.2s;
+}
+.btn-retry:hover { border-color: #c9a84c; color: #e8d08a; }
+.footer-note {
+  text-align: center; font-size: 11px;
+  color: rgba(180,167,216,0.58); letter-spacing: 0.08em; margin-top: 32px;
+}
+@media (max-width: 640px) {
+  .container { padding: 28px 16px; }
+  .card, .result-card { padding: 24px 18px; }
+  .summary-grid, .lucky-grid { grid-template-columns: 1fr; }
+  .site-name { font-size: 24px; }
+  .result-title { font-size: 21px; }
+}
+
+.free-end-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin: 42px 0 34px;
+  color: #e8d08a;
+  font-family: 'Noto Serif JP', serif;
+  font-size: 14px;
+  letter-spacing: 0.22em;
+  text-align: center;
+}
+
+.free-end-divider span {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(201,168,76,0.75), transparent);
+}
+
+.free-end-divider strong {
+  font-weight: 400;
+  white-space: nowrap;
+  text-shadow: 0 0 16px rgba(201,168,76,0.35);
+}
+
+@media (max-width: 520px) {
+  .free-end-divider {
+    gap: 8px;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+  }
+}
+
+.deep-consult-intro { margin: 46px 0 26px; text-align: center; }
+.deep-consult-title { font-family: 'Noto Serif JP', serif; font-size: 28px; color: #e8d08a; font-weight: 300; letter-spacing: 0.18em; margin-bottom: 8px; text-shadow: 0 0 18px rgba(201,168,76,0.26); }
+.deep-consult-subtitle { font-size: 14px; color: rgba(248,244,237,0.82); letter-spacing: 0.12em; line-height: 1.8; }
+.deep-consult-ornament { display:flex; align-items:center; justify-content:center; gap:10px; width:230px; margin:14px auto 0; color:#e8d08a; }
+.deep-consult-ornament::before, .deep-consult-ornament::after { content:''; height:1px; flex:1; background:linear-gradient(to right, transparent, rgba(201,168,76,0.8), transparent); }
+.consult-focus-box { margin-top:24px; padding:26px; border-radius:15px; border:1px solid rgba(201,168,76,0.28); background:rgba(30,18,50,0.42); }
+.consult-divider { display:flex; align-items:center; gap:14px; margin:26px 0; color:#e8d08a; }
+.consult-divider::before, .consult-divider::after { content:''; flex:1; border-top:1px dashed rgba(232,208,138,0.42); }
+.consult-divider span { width:42px; height:42px; display:flex; align-items:center; justify-content:center; border:1px solid rgba(201,168,76,0.45); border-radius:50%; background:rgba(201,168,76,0.08); }
+.privacy-note { text-align:center; color:rgba(180,167,216,0.72); font-size:12px; margin-top:20px; letter-spacing:0.06em; }
+@media (max-width: 520px) { .deep-consult-title { font-size: 22px; letter-spacing: 0.12em; } .consult-focus-box { padding: 20px 16px; } }
+
+
+.consult-page-card {
+  background: rgba(30,18,50,0.78);
+  border: 1px solid rgba(201,168,76,0.34);
+  border-radius: 18px;
+  padding: 32px;
+  backdrop-filter: blur(12px);
+  margin-bottom: 24px;
+  box-shadow: 0 18px 50px rgba(0,0,0,0.18);
+  animation: fadeUp 0.6s ease forwards;
+}
+.consult-page-header { text-align: center; margin-bottom: 28px; padding-bottom: 22px; border-bottom: 1px solid rgba(201,168,76,0.15); }
+.consult-page-title { font-family: 'Noto Serif JP', serif; font-size: 25px; color: #e8d08a; font-weight: 300; letter-spacing: 0.12em; margin-bottom: 8px; text-shadow: 0 0 18px rgba(201,168,76,0.22); }
+.consult-page-lead { font-size: 14px; color: rgba(248,244,237,0.84); line-height: 1.95; letter-spacing: 0.03em; margin-bottom: 24px; white-space: pre-line; }
+.form-textarea { min-height: 120px; resize: vertical; line-height: 1.7; }
+.consult-output { display: none; margin-top: 26px; padding: 22px; border-radius: 15px; background: rgba(201,168,76,0.075); border-left: 2px solid #c9a84c; }
+.consult-output-title { font-family: 'Noto Serif JP', serif; font-size: 15px; color: #e8d08a; letter-spacing: 0.14em; margin-bottom: 12px; }
+.consult-output-text { font-size: 14px; color: rgba(248,244,237,0.88); line-height: 1.95; white-space: pre-line; }
+.btn-secondary { width: 100%; background: transparent; border: 1px solid rgba(201,168,76,0.4); border-radius: 12px; color: #b4a7d8; font-family: 'Zen Kaku Gothic New', sans-serif; font-size: 14px; padding: 14px; cursor: pointer; letter-spacing: 0.1em; margin-top: 14px; }
+@media (max-width: 640px) { .consult-page-card { padding: 24px 18px; } .consult-page-title { font-size: 21px; } }
+
+/* selectだと一目でわかるようにする */
+select.form-input {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 44px;
+  background-image:
+    url("data:image/svg+xml;utf8,<svg fill='%23e8d08a' height='22' viewBox='0 0 20 20' width='22' xmlns='http://www.w3.org/2000/svg'><path d='M5 7l5 5 5-5z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 18px;
+}
+
+</style>
+</head>
+<body>
+<div class="stars-bg"></div>
+<div class="container">
+
+  <header class="site-header">
+    <span class="logo-mark">✦</span>
+    <h1 class="site-name">星命館</h1>
+    <p class="tagline">星座と数秘で読み解く、あなたの性格診断</p>
+  </header>
+
+  <div id="form-section" class="card">
+    <p class="card-title">✦ 生年月日を入力してください ✦</p>
+
+    <div class="form-group">
+      <label class="form-label">生まれた年</label>
+      <select id="input-year" class="form-input">
+        <option value="">年を選ぶ</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">生まれた月と日</label>
+      <div class="form-row">
+        <select id="input-month" class="form-input">
+          <option value="">月を選ぶ</option>
+        </select>
+        <select id="input-day" class="form-input">
+          <option value="">日を選ぶ</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="loading-area" class="loading-area hidden">
+      <div class="loading-spinner"></div>
+      <p class="loading-text" id="loading-msg">星と数字を読み解いています...</p>
+    </div>
+
+    <button class="btn-primary" id="btn-diagnose" onclick="startDiagnosis()">
+      ✦ 無料で診断する ✦
+    </button>
+  </div>
+
+  <div id="result-section" class="hidden">
+    <div class="result-card">
+      <div class="result-header">
+        <p class="result-person" id="r-person"></p>
+        <h2 class="result-title" id="r-title"></h2>
+        <span class="result-element" id="r-element"></span>
+      </div>
+
+      <div class="summary-grid" id="summary-grid"></div>
+
+      <p class="section-title">あなたの基本性格</p>
+      <p class="result-text" id="r-message"></p>
+
+      <p class="section-title">あなたの強み</p>
+      <p class="result-text" id="r-strength"></p>
+
+      <p class="section-title">疲れやすいポイント</p>
+      <p class="result-text" id="r-shadow"></p>
+
+      <p class="section-title">今のあなたへ</p>
+      <div class="advice-box">
+        <p class="advice-text" id="r-advice"></p>
+      </div>
+
+      <p class="section-title">ラッキー情報</p>
+      <div class="lucky-grid" id="lucky-grid"></div>
+
+      <div class="free-end-divider" aria-hidden="true">
+        <span></span>
+        <strong>✦ 無料診断はここまでです ✦</strong>
+        <span></span>
+      </div>
+
+      <div class="paid-preview">
+        <p class="section-title">ここから先で読めること</p>
+        <p class="result-text">ここから先では、あなたの星座と数秘を掛け合わせて、もう少し具体的に読み解きます。</p>
+        <p class="result-text">・頑張らなくても流れが整いやすい生き方<br>・人間関係で疲れない距離感<br>・仕事やお金との向き合い方<br>・恋愛で無理をしやすい癖<br>・今のあなたに必要な小さな選択</p>
+        <button class="btn-paid" id="paidBtn" type="button">さらに詳しく読む</button>
+      </div>
+
+      <div id="paidContent">
+        <p class="section-title">頑張らない生き方</p>
+        <div class="paid-box"><p class="paid-text" id="paid-life"></p></div>
+
+        <p class="section-title">人間関係の整え方</p>
+        <p class="paid-text" id="paid-relationship"></p>
+
+        <p class="section-title">仕事・お金の向き合い方</p>
+        <p class="paid-text" id="paid-work"></p>
+
+        <p class="section-title">恋愛で無理をしないために</p>
+        <p class="paid-text" id="paid-love"></p>
+
+        <div class="deep-consult-intro">
+          <h3 class="deep-consult-title">さらに深く知りたいあなたへ</h3>
+          <p class="deep-consult-subtitle">あなたの本当のこと、もっと詳しくお話ししませんか？</p>
+          <div class="deep-consult-ornament">✦</div>
+        </div>
+
+        <div class="consult-focus-box">
+          <p class="section-title">誰にも言えない悩みがある方へ</p>
+          <p class="paid-text">本当は、もっと具体的な悩みや、誰にも言えないことがあるのではないでしょうか。恋愛のこと、身体のこと、人間関係のこと。人には話しづらいことほど、ひとりで抱えやすいものです。</p>
+          <p class="paid-text">ここでは、あなたの状況に合わせて、できるだけ具体的にお答えします。親しい人にも話しづらいことでも大丈夫です。</p>
+          <div class="consult-divider"><span>☾</span></div>
+          <button class="btn-consult" id="openConsultBtn" type="button">今の気持ちを整理する</button>
+        </div>
+        <p class="privacy-note">入力内容はこの画面上で気持ちを整理するためのものです</p>
+      </div>
+    </div>
+
+    <div id="consult-section" class="consult-page-card hidden">
+      <div class="consult-page-header">
+        <p class="result-person" id="consult-person"></p>
+        <h2 class="consult-page-title">あなたの気持ちを整理する</h2>
+        <span class="result-element" id="consult-base"></span>
+      </div>
+      <p class="consult-page-lead">診断結果をふまえて、今抱えている気持ちを少しだけ言葉にしてみるページです。
+誰かにうまく説明できないことでも、そのまま書いて大丈夫です。</p>
+      <div class="form-group">
+        <label class="form-label">今いちばん気になっていること</label>
+        <textarea id="consult-worry" class="form-input form-textarea" placeholder="例：仕事のこと、人間関係のこと、恋愛のこと、これからのことなど"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">今の気持ちに近いもの</label>
+        <select id="consult-feeling" class="form-input">
+          <option value="">-- 選択してください --</option>
+          <option value="疲れている">疲れている</option>
+          <option value="不安">不安</option>
+          <option value="迷っている">迷っている</option>
+          <option value="寂しい">寂しい</option>
+          <option value="怒っている">怒っている</option>
+          <option value="わからない">わからない</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">どうなったら少し楽になりそうですか？</label>
+        <textarea id="consult-hope" class="form-input form-textarea" placeholder="例：少し休めたら、誰かにわかってもらえたら、決めなくてよくなったら"></textarea>
+      </div>
+      <button class="btn-primary" id="organizeBtn" type="button">気持ちを整理する</button>
+      <div id="consult-output" class="consult-output">
+        <p class="consult-output-title">今のあなたへ</p>
+        <p class="consult-output-text" id="consult-output-text"></p>
+      </div>
+      <button class="btn-secondary" id="backToResultBtn" type="button">← 診断結果に戻る</button>
+    </div>
+
+    <button class="btn-retry" onclick="resetForm()">← 別の生年月日で診断する</button>
+  </div>
+
+  <p class="footer-note">※ この診断は娯楽目的のAI生成コンテンツです。医療・法律・投資等の専門判断を代替するものではありません。</p>
+</div>
+
+<script>
+const yearSel = document.getElementById('input-year');
+const monthSel = document.getElementById('input-month');
+const daySel = document.getElementById('input-day');
+const currentYear = new Date().getFullYear();
+
+for (let y = currentYear - 10; y >= 1930; y--) {
+  const o = document.createElement('option');
+  o.value = y;
+  o.textContent = y + '年';
+  yearSel.appendChild(o);
+}
+
+const monthNames = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+monthNames.forEach((m, i) => {
+  const o = document.createElement('option');
+  o.value = i + 1;
+  o.textContent = m;
+  monthSel.appendChild(o);
+});
+
+function updateDays() {
+  const year = parseInt(yearSel.value) || 2000;
+  const month = parseInt(monthSel.value) || 1;
+  const selected = parseInt(daySel.value);
+  const maxDay = new Date(year, month, 0).getDate();
+  daySel.innerHTML = '<option value="">日を選ぶ</option>';
+  for (let d = 1; d <= maxDay; d++) {
+    const o = document.createElement('option');
+    o.value = d;
+    o.textContent = d + '日';
+    daySel.appendChild(o);
+  }
+  if (selected && selected <= maxDay) daySel.value = selected;
+}
+
+yearSel.addEventListener('change', updateDays);
+monthSel.addEventListener('change', updateDays);
+updateDays();
+
+const ZODIAC_DATA = [
+  { name: '牡羊座', from: [3,21], to: [4,19], element: '火', phrase: '始まりの火を持つ人', trait: '思い立った瞬間に動ける強さがあります。迷いながら止まるより、まず一歩踏み出すことで流れを作るタイプです。', shadow: 'ただし、周りの速度に合わせすぎると、自分だけが先に疲れてしまうことがあります。' },
+  { name: '牡牛座', from: [4,20], to: [5,20], element: '地', phrase: '安心を育てる人', trait: '感覚が鋭く、本当に心地よいものを見分ける力があります。急がず、確かなものを積み上げることで魅力が増すタイプです。', shadow: '一度我慢を始めると限界まで抱え込みやすいので、違和感を小さなうちに外へ出すことが大切です。' },
+  { name: '双子座', from: [5,21], to: [6,21], element: '風', phrase: '言葉で世界を広げる人', trait: '情報を受け取り、言葉にして、人と人をつなぐ力があります。ひとつの場所に閉じ込められるより、軽やかに動くほど才能が出ます。', shadow: '気づきすぎる分、頭が休まらなくなりやすいところがあります。' },
+  { name: '蟹座', from: [6,22], to: [7,22], element: '水', phrase: '大切な人を守る人', trait: '相手の小さな変化に気づける、深い共感力があります。安心できる場所を作ることで、本来の力が発揮されます。', shadow: '人を守ろうとしすぎて、自分の気持ちを後回しにしやすいところがあります。' },
+  { name: '獅子座', from: [7,23], to: [8,22], element: '火', phrase: '自分の光で照らす人', trait: '本当は人を明るくする存在感があります。認められるためではなく、好きなことにまっすぐ向かうと輝きます。', shadow: '強く見られやすい分、弱音を出す場所を失いやすいところがあります。' },
+  { name: '乙女座', from: [8,23], to: [9,22], element: '地', phrase: '整えることで救う人', trait: '細かな違和感に気づき、物事を使いやすく整える力があります。誰かの混乱を静かにほどくことができます。', shadow: '完璧にしようとするほど、自分への採点が厳しくなりやすいところがあります。' },
+  { name: '天秤座', from: [9,23], to: [10,23], element: '風', phrase: '調和を選ぶ美しい人', trait: '人との距離感や場の空気を読む力があります。偏りを整え、心地よい関係を作るセンスがあります。', shadow: '誰にとっても感じよくあろうとして、自分の本音が後回しになりやすいところがあります。' },
+  { name: '蠍座', from: [10,24], to: [11,22], element: '水', phrase: '深く見抜く人', trait: '表面ではなく本質を見つめる力があります。浅い関係より、深く信頼できるものに人生を注ぐタイプです。', shadow: '真剣だからこそ、簡単に割り切れない感情を抱えやすいところがあります。' },
+  { name: '射手座', from: [11,23], to: [12,21], element: '火', phrase: '遠くへ向かう自由な人', trait: '可能性を信じて広い世界へ進む力があります。知らないことを学び、経験に変えるほど運が開きます。', shadow: '自由でいたい気持ちと、現実の責任との間で苦しくなりやすいところがあります。' },
+  { name: '山羊座', from: [12,22], to: [1,19], element: '地', phrase: '静かに積み上げる人', trait: '目の前のことを現実に変える力があります。派手さよりも信頼を重ねることで、長く残るものを作れるタイプです。', shadow: '頑張れる人だからこそ、休む理由を自分に与えにくいところがあります。' },
+  { name: '水瓶座', from: [1,20], to: [2,18], element: '風', phrase: '新しい視点を持つ人', trait: '人と違う視点から、未来の形を見つける力があります。常識に合わせるより、自分らしい仕組みを作るほど生きやすくなります。', shadow: '理解されない感覚を抱えたとき、急に心を閉じてしまうことがあります。' },
+  { name: '魚座', from: [2,19], to: [3,20], element: '水', phrase: '心の奥に寄り添う人', trait: '境界線の向こうにある痛みまで感じ取れる人です。言葉にならない気持ちを受け止める優しさがあります。', shadow: '共感しすぎると、相手の感情まで自分のもののように背負ってしまうことがあります。' }
+];
+
+const NUMEROLOGY_DATA = {
+  1: { title: '自分で道を切り開く人', core: '誰かの正解をなぞるより、自分で決めたときに強くなれる人です。小さくても主導権を取り戻すことが、運を動かす鍵になります。', strength: '決断力、突破力、始める力', shadow: '全部ひとりで背負おうとしやすい' },
+  2: { title: '人の気持ちを受け取る人', core: '相手の空気を読む力があります。争うより、そっと整えることで人を救えるタイプです。', strength: '共感力、調整力、優しさ', shadow: '自分の希望を小さくしやすい' },
+  3: { title: '言葉と表現で軽くする人', core: '重たい空気を少し明るくする力があります。感じたことを外に出すほど、本来の魅力が戻ります。', strength: '表現力、明るさ、発想力', shadow: '笑ってごまかして疲れを隠しやすい' },
+  4: { title: '安心できる土台を作る人', core: '地道に積み上げる力があります。派手ではなくても、あなたが作る安心感に救われる人がいます。', strength: '継続力、責任感、安定感', shadow: 'ちゃんとしなきゃで自分を縛りやすい' },
+  5: { title: '変化の中で息を吹き返す人', core: '同じ場所に閉じ込められるより、動きながら自分を取り戻すタイプです。選択肢があるほど力が出ます。', strength: '柔軟性、行動力、好奇心', shadow: '落ち着かなきゃと思うほど苦しくなりやすい' },
+  6: { title: '大切な人を包む人', core: '人を思う力が深い人です。愛情を注ぐ才能がありますが、自分も同じくらい守ることが必要です。', strength: '愛情、責任感、美意識', shadow: '必要とされるほど断れなくなりやすい' },
+  7: { title: '静かに本質を見抜く人', core: '表面の言葉より、奥にある意味を見つめる人です。ひとりで整える時間が才能の源になります。', strength: '洞察力、探究心、集中力', shadow: '考えすぎて孤独を深めやすい' },
+  8: { title: '現実を動かす力を持つ人', core: '理想を形にする力があります。責任を引き受けられる人ですが、強さだけで生きなくて大丈夫です。', strength: '実行力、管理力、影響力', shadow: '弱さを見せられず限界まで頑張りやすい' },
+  9: { title: '広い優しさで受け止める人', core: 'いろいろな立場の気持ちを想像できる人です。手放すことで、次の流れが入ってきます。', strength: '包容力、直感、精神性', shadow: '終わったことまで抱え続けやすい' },
+  11: { title: '直感で人の心を照らす人', core: '言葉になる前の気配を受け取れる人です。繊細さは弱さではなく、誰かの心に光を当てる力です。', strength: '直感、感受性、インスピレーション', shadow: '刺激を受けすぎて消耗しやすい' },
+  22: { title: '大きな理想を現実にする人', core: '夢を夢のままにせず、仕組みに変える力があります。小さく始めるほど、大きな形へ育てられます。', strength: '構築力、影響力、現実化', shadow: '理想が大きい分、自分を追い込みやすい' },
+  33: { title: '無条件の優しさを持つ人', core: '常識の枠では測れない大きな愛情があります。人を救う前に、自分を置き去りにしないことが大切です。', strength: '慈愛、表現、癒し', shadow: '人の痛みを背負いすぎやすい' }
+};
+
+const LUCKY_COLORS = ['藤色','金色','白銀','深緑','珊瑚色','紺碧','薄紅','ラベンダー','ミルクティー','月白'];
+const LUCKY_ITEMS = ['白いノート','温かい飲み物','小さな花','香りのよい入浴剤','やわらかい羽織り','月モチーフ','きれいなペン','天然素材の小物'];
+const LUCKY_WORDS = ['今日は保留でいい','小さく始める','無理に明るくしない','ちゃんと休む','選び直していい','自分を急がせない','静かな方を選ぶ','心地よさを信じる'];
+
+function getZodiac(month, day) {
+  return ZODIAC_DATA.find(z => {
+    const [fm, fd] = z.from;
+    const [tm, td] = z.to;
+    if (fm <= tm) {
+      return (month > fm || (month === fm && day >= fd)) && (month < tm || (month === tm && day <= td));
+    }
+    return (month > fm || (month === fm && day >= fd)) || (month < tm || (month === tm && day <= td));
+  });
+}
+
+function digitSum(n) {
+  return String(n).split('').reduce((sum, ch) => sum + Number(ch), 0);
+}
+
+function getLifePath(year, month, day) {
+  const raw = String(year).padStart(4, '0') + String(month).padStart(2, '0') + String(day).padStart(2, '0');
+  let sum = raw.split('').reduce((acc, ch) => acc + Number(ch), 0);
+  while (![11, 22, 33].includes(sum) && sum > 9) {
+    sum = digitSum(sum);
+  }
+  return sum;
+}
+
+function seededRand(seed) {
+  let s = seed;
+  return function() {
+    s = ((s * 1664525 + 1013904223) & 0xffffffff) >>> 0;
+    return s / 4294967296;
+  };
+}
+function pick(arr, rand) { return arr[Math.floor(rand() * arr.length)]; }
+
+function buildMessage(zodiac, numData) {
+  return `あなたは、${zodiac.phrase}です。\n\n${zodiac.trait}\n\n数秘で見る核は「${numData.title}」。${numData.core}\n\nこの2つが重なることで、あなたは「自分の感覚に合う場所」では自然に力を発揮できます。逆に、合わない環境で無理に頑張り続けると、能力がないのではなく、先に心と体の余白が削られやすいタイプです。\n\nだから大切なのは、もっと強くなることではありません。自分がどんな場面で力を出しやすく、どんな場面で消耗しやすいのかを知ることです。`;
+}
+
+function buildStrength(zodiac, numData) {
+  return `あなたの強みは、${numData.strength}です。\n\n${zodiac.name}の性質が加わることで、その強みはただの長所ではなく、「人や状況をよく見て、自分なりの形に整える力」として表れます。\n\nあなたは、派手に目立つことで評価されるよりも、気づいたことを丁寧に拾い、必要なところへ静かに力を注ぐほど魅力が出ます。\n\n人から見れば何気ない配慮や判断でも、あなたにとっては生まれ持った大切な才能です。`;
+}
+
+function buildShadow(zodiac, numData) {
+  return `${zodiac.shadow}\n\n数秘の面では「${numData.shadow}」ところもあります。\n\nこれは欠点ではありません。むしろ、あなたが真面目に向き合ってきたからこそ出やすい反応です。\n\nただし、その力を使い続けると、自分ではまだ大丈夫だと思っていても、内側ではかなり疲れが溜まっていることがあります。\n\n疲れたときに必要なのは、自分を責めることではなく、「今は力の使い方を変える時期かもしれない」と気づくことです。`;
+}
+
+function buildAdvice(zodiac, number) {
+  const byElement = {
+    '火': '今は、気合いで押し切るより、心が少し明るくなる選択をひとつだけ選んでください。火の性質を持つあなたは、完全に止まるよりも、小さく動いた方が呼吸を取り戻しやすい人です。けれど、勢いだけで進むと疲れが後から来ます。今日は「全部やる」ではなく「ひとつだけ進める」で十分です。',
+    '地': '今は、安心できる土台を整える時期です。地の性質を持つあなたは、暮らしや環境が乱れると、心まで落ち着きにくくなります。大きな決断よりも、予定を減らす、部屋の一角を整える、やらないことを決める。そういう小さな安定が、いちばん回復につながります。',
+    '風': '今は、頭の中にあることを外へ出すと整いやすい時期です。風の性質を持つあなたは、考えを閉じ込めるほど疲れやすくなります。誰かに話す、メモに書く、言葉にして区切る。それだけで、抱えていたものの重さが少し軽くなります。',
+    '水': '今は、感情をなかったことにしないでください。水の性質を持つあなたは、言葉になる前の揺れを受け取りやすい人です。泣ける日、決められない日、誰にも会いたくない日にも意味があります。今日は感情を消すより、静かに置いてあげることが大切です。'
+  };
+  return `${byElement[zodiac.element]}\n\n数秘${number}のあなたは、自分に合わない頑張り方を続けるほど、本来の力が出にくくなります。今日は「もっと頑張る」ではなく、「少し軽くする」を選んで大丈夫です。`;
+}
+
+function buildPaidTexts(zodiac, number, numData) {
+  const life = `あなたに必要なのは、努力を増やすことではなく、努力の向きを変えることです。\n\n${zodiac.name}のあなたは、${zodiac.element}の性質を持っています。だから、無理に誰かのやり方へ合わせるより、自分が自然に息をしやすい環境を整えるほど、流れが戻ります。\n\n数秘${number}のテーマは「${numData.title}」。今のあなたは、もっと頑張れば変わるというより、「何に力を使い、何から力を抜くか」を選び直す段階にいます。\n\nまずは、全部を一気に変えようとしなくて大丈夫です。予定をひとつ減らす、返信を急がない、合わない場所から少し距離を取る。そういう小さな選択が、あなたの流れを整えていきます。`;
+
+  const relationship = `人間関係では、相手に合わせることと、自分を消すことを混同しないでください。\n\nあなたは、相手の反応や場の空気を感じ取れるぶん、「こうした方がいいかな」と先回りしやすいところがあります。けれど、本当に長く続く関係は、あなたが無理をし続けなくても残る関係です。\n\n今のあなたに必要なのは、急に人を切ることではなく、心の距離を少し調整すること。返信を少し遅らせる、全部説明しようとしない、相手の機嫌を自分の責任にしない。\n\nそれだけでも、人間関係の疲れはかなり軽くなります。`;
+
+  const work = `仕事やお金では、「ちゃんとしなきゃ」だけで走り続けないことが大切です。\n\nあなたは責任感が出るほど力を発揮しますが、同時に、求められた以上のことまで抱えやすいタイプでもあります。\n\n今のあなたに合うのは、気合いで乗り切る働き方ではなく、迷わなくていい仕組みを作ることです。毎回ゼロから考えるより、手順を決める。全部自分で抱えるより、任せる・減らす・後回しにする基準を持つ。\n\nお金に関しても、増やす前に「漏れている負担」を減らすことが先です。無理なく続く形を作れたとき、あなたの現実は安定していきます。`;
+
+  const love = `恋愛では、相手を理解しようとしすぎて、自分の寂しさを後回しにしないでください。\n\nあなたは深く向き合える人だからこそ、曖昧な言葉や不安定な態度に心を持っていかれやすいところがあります。\n\n大切なのは、愛されるために我慢することではありません。安心できるか、尊重されているか、自分のままでいられるか。その感覚をもっと信じていいのです。\n\n相手の気持ちを読む前に、自分がどう感じているかを確認してください。そこを飛ばさないことが、恋愛で無理をしないための最初の線引きになります。`;
+
+  return { life, relationship, work, love };
+}
+
+function startDiagnosis() {
+  const year = parseInt(yearSel.value);
+  const month = parseInt(monthSel.value);
+  const day = parseInt(daySel.value);
+
+  if (!year || !month || !day) {
+    alert('生年月日をすべて選択してください');
+    return;
+  }
+
+  const maxDay = new Date(year, month, 0).getDate();
+  if (day > maxDay) {
+    alert('存在する日付を選択してください');
+    return;
+  }
+
+  document.getElementById('btn-diagnose').disabled = true;
+  document.getElementById('loading-area').classList.remove('hidden');
+
+  const msgs = ['星と数字を読み解いています...', '生年月日のリズムを確認中...', 'あなたの性質を言葉にしています...'];
+  let i = 0;
+  const interval = setInterval(() => {
+    document.getElementById('loading-msg').textContent = msgs[i++ % msgs.length];
+  }, 700);
+
+  setTimeout(() => {
+    clearInterval(interval);
+    showResult(year, month, day);
+  }, 1600);
+}
+
+function showResult(year, month, day) {
+  const zodiac = getZodiac(month, day);
+  const lifePath = getLifePath(year, month, day);
+  const numData = NUMEROLOGY_DATA[lifePath];
+  const seed = year * 10000 + month * 100 + day;
+  const rand = seededRand(seed);
+
+  document.getElementById('r-person').textContent = `${year}年 ${month}月 ${day}日 生まれ`;
+  document.getElementById('r-title').textContent = `${zodiac.name} × 数秘${lifePath}`;
+  document.getElementById('r-element').textContent = `${zodiac.phrase} / ${numData.title}`;
+
+  document.getElementById('summary-grid').innerHTML = [
+    { label: '星座', value: zodiac.name },
+    { label: '星の性質', value: zodiac.element + 'のエレメント' },
+    { label: '数秘', value: lifePath },
+    { label: '数秘テーマ', value: numData.title }
+  ].map(item => `<div class="summary-item"><p class="summary-label">${item.label}</p><p class="summary-value">${item.value}</p></div>`).join('');
+
+  document.getElementById('r-message').textContent = buildMessage(zodiac, numData);
+  document.getElementById('r-strength').textContent = buildStrength(zodiac, numData);
+  document.getElementById('r-shadow').textContent = buildShadow(zodiac, numData);
+  document.getElementById('r-advice').textContent = buildAdvice(zodiac, lifePath);
+
+  document.getElementById('lucky-grid').innerHTML = [
+    { label: 'ラッキーカラー', value: pick(LUCKY_COLORS, rand) },
+    { label: 'ラッキーアイテム', value: pick(LUCKY_ITEMS, rand) },
+    { label: '今日の言葉', value: pick(LUCKY_WORDS, rand) }
+  ].map(item => `<div class="lucky-item"><span class="lucky-label">${item.label}</span><span class="lucky-value">${item.value}</span></div>`).join('');
+
+  currentDiagnosis = {
+    person: `${year}年 ${month}月 ${day}日 生まれ`,
+    zodiac: zodiac.name,
+    lifePath: lifePath
+  };
+
+  const paid = buildPaidTexts(zodiac, lifePath, numData);
+  document.getElementById('paid-life').textContent = paid.life;
+  document.getElementById('paid-relationship').textContent = paid.relationship;
+  document.getElementById('paid-work').textContent = paid.work;
+  document.getElementById('paid-love').textContent = paid.love;
+  document.getElementById('paidContent').style.display = 'none';
+
+  document.getElementById('form-section').classList.add('hidden');
+  document.getElementById('result-section').classList.remove('hidden');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+document.getElementById('paidBtn').addEventListener('click', function() {
+  document.getElementById('paidContent').style.display = 'block';
+  this.textContent = '表示中';
+  this.disabled = true;
+});
+
+let currentDiagnosis = null;
+
+const openConsultBtn = document.getElementById('openConsultBtn');
+if (openConsultBtn) {
+  openConsultBtn.addEventListener('click', function() {
+    const consultSection = document.getElementById('consult-section');
+    consultSection.classList.remove('hidden');
+    if (currentDiagnosis) {
+      document.getElementById('consult-person').textContent = currentDiagnosis.person;
+      document.getElementById('consult-base').textContent = `${currentDiagnosis.zodiac} × 数秘${currentDiagnosis.lifePath}`;
+    }
+    consultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+}
+
+const CONSULT_API_ENDPOINT = '/api/consult';
+
+function buildConsultPromptPayload() {
+  const worry = document.getElementById('consult-worry').value.trim();
+  const feeling = document.getElementById('consult-feeling').value;
+  const goal = document.getElementById('consult-hope').value.trim();
+
+  return {
+    zodiac: currentDiagnosis ? currentDiagnosis.zodiac : '',
+    number: currentDiagnosis ? String(currentDiagnosis.lifePath) : '',
+    worry,
+    feeling,
+    goal
+  };
+}
+
+async function generateConsultMessage(payload) {
+  const response = await fetch(CONSULT_API_ENDPOINT, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || '相談文の生成に失敗しました');
+  }
+
+  const data = await response.json();
+  if (!data || !data.message) {
+    throw new Error('生成結果が空でした');
+  }
+
+  return data.message;
+}
+
+const organizeBtn = document.getElementById('organizeBtn');
+if (organizeBtn) {
+  organizeBtn.addEventListener('click', async function() {
+    const payload = buildConsultPromptPayload();
+
+    if (!payload.worry) {
+      alert('今いちばん気になっていることを入力してください');
+      return;
+    }
+
+    if (!payload.feeling) {
+      alert('今の気持ちに近いものを選択してください');
+      return;
+    }
+
+    const output = document.getElementById('consult-output');
+    const outputText = document.getElementById('consult-output-text');
+
+    output.style.display = 'block';
+    outputText.textContent = 'あなたの言葉を読み取りながら、気持ちを整理しています...';
+    this.disabled = true;
+    this.textContent = '整理しています...';
+
+    try {
+      const message = await generateConsultMessage(payload);
+      outputText.textContent = message;
+      output.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch (error) {
+      console.error(error);
+      outputText.textContent = 'OpenAI連携の準備がまだ完了していないため、回答を生成できませんでした。\n\nこの画面を動かすには、サーバー側に /api/consult を用意し、OPENAI_API_KEY を環境変数に設定してください。';
+    } finally {
+      this.disabled = false;
+      this.textContent = '気持ちを整理する';
+    }
+  });
+}
+
+const backToResultBtn = document.getElementById('backToResultBtn');
+if (backToResultBtn) {
+  backToResultBtn.addEventListener('click', function() {
+    document.querySelector('.result-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+}
+
+
+function resetForm() {
+  document.getElementById('result-section').classList.add('hidden');
+  document.getElementById('form-section').classList.remove('hidden');
+  document.getElementById('loading-area').classList.add('hidden');
+  document.getElementById('btn-diagnose').disabled = false;
+  document.getElementById('paidBtn').disabled = false;
+  document.getElementById('paidBtn').textContent = 'さらに詳しく読む';
+  document.getElementById('paidContent').style.display = 'none';
+  document.getElementById('consult-section').classList.add('hidden');
+  document.getElementById('consult-output').style.display = 'none';
+  document.getElementById('consult-worry').value = '';
+  document.getElementById('consult-hope').value = '';
+  document.getElementById('consult-feeling').value = '';
+  currentDiagnosis = null;
+  yearSel.value = '';
+  monthSel.value = '';
+  updateDays();
+  daySel.value = '';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
