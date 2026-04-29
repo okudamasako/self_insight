@@ -4,7 +4,8 @@ export default async function handler(req, res) {
   }
 
   // デモ版として Gemini API を直接使用します
-  const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+  // Vercelで設定した際の大文字小文字の違い(Gemini_API_KEY)も吸収できるようにします
+  const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.Gemini_API_KEY;
 
   if (!GEMINI_API_KEY) {
     return res.status(500).json({ error: 'Gemini APIキーが設定されていません。Vercelの環境変数に GEMINI_API_KEY を設定してください。' });
@@ -22,7 +23,7 @@ export default async function handler(req, res) {
     // ユーザーからの入力
     const promptText = `【相談内容】${worry}\n【今の気持ち】${feeling}\n【どうなりたいか】${goal}`;
 
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${GEMINI_API_KEY}`;
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
 
     const response = await fetch(apiUrl, {
       method: 'POST',
