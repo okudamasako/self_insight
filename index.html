@@ -705,8 +705,19 @@ if (openConsultBtn) {
   });
 }
 
+/**
+ * -----------------------------------------------------
+ * API通信処理：気持ちを整理する機能
+ * -----------------------------------------------------
+ * ユーザーが入力したフォームの値を受け取り、バックエンドのAPI(/api/consult)へ送信します。
+ * 送信後、AIからの返答を受け取って画面に表示するための処理です。
+ */
+
 const CONSULT_API_ENDPOINT = '/api/consult';
 
+/**
+ * フォームに入力された値を集めて、APIに送信するためのデータ（ペイロード）を作ります。
+ */
 function buildConsultPromptPayload() {
   const worry = document.getElementById('consult-worry').value.trim();
   const feeling = document.getElementById('consult-feeling').value;
@@ -721,31 +732,43 @@ function buildConsultPromptPayload() {
   };
 }
 
+/**
+ * 実際にAPIへデータを送信（POST）し、AIからの返答を受け取る関数です。
+ */
 async function generateConsultMessage(payload) {
+  // fetchを使って、指定したURL(API)にデータを送信します
   const response = await fetch(CONSULT_API_ENDPOINT, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
+    method: 'POST', // データを送信するためPOSTメソッドを使用します
+    headers: { 'Content-Type': 'application/json' }, // データ形式がJSONであることを伝えます
+    body: JSON.stringify(payload) // データをJSON形式の文字列に変換して送信します
   });
 
+  // もし通信が失敗した場合は、エラーを投げます
   if (!response.ok) {
     const errorText = await response.text();
     throw new Error(errorText || '相談文の生成に失敗しました');
   }
 
+  // 通信が成功した場合、返ってきたデータをJSONとして読み込みます
   const data = await response.json();
   if (!data || !data.message) {
     throw new Error('生成結果が空でした');
   }
 
+  // 最終的なAIのメッセージを返します
   return data.message;
 }
 
+/**
+ * 「気持ちを整理する」ボタンが押されたときの処理です。
+ */
 const organizeBtn = document.getElementById('organizeBtn');
 if (organizeBtn) {
   organizeBtn.addEventListener('click', async function() {
+    // 1. 送信するデータを作ります
     const payload = buildConsultPromptPayload();
 
+    // 2. 必須項目が入力されているかチェックします
     if (!payload.worry) {
       alert('今いちばん気になっていることを入力してください');
       return;
@@ -756,22 +779,30 @@ if (organizeBtn) {
       return;
     }
 
+    // 3. 結果を表示するエリアの準備をします
     const output = document.getElementById('consult-output');
     const outputText = document.getElementById('consult-output-text');
 
-    output.style.display = 'block';
-    outputText.textContent = 'あなたの言葉を読み取りながら、気持ちを整理しています...';
+    output.style.display = 'block'; // エリアを表示する
+    outputText.textContent = 'あなたの言葉を読み取りながら、気持ちを整理しています...'; // ローディング中のメッセージ
+    
+    // ボタンを無効化して、二重送信を防ぎます
     this.disabled = true;
     this.textContent = '整理しています...';
 
+    // 4. APIと通信して、結果を受け取ります
     try {
-      const message = await generateConsultMessage(payload);
-      outputText.textContent = message;
+      const message = await generateConsultMessage(payload); // API呼び出し
+      outputText.textContent = message; // 返ってきたメッセージを画面に表示
+      
+      // 結果が見やすいように画面をスクロールさせます
       output.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } catch (error) {
+      // エラーが起きた場合は、エラー内容を画面に表示します
       console.error(error);
-      outputText.textContent = '相談の生成に失敗しました。通信状況を確認して、少し時間をおいてからもう一度お試しください。';
+      outputText.textContent = '【エラーが発生しました】\n' + error.message + '\n\n※Dify APIの設定（キー等）またはローカルサーバーの起動状況をご確認ください。';
     } finally {
+      // 5. 処理が終わったら、ボタンを元の状態に戻します
       this.disabled = false;
       this.textContent = '気持ちを整理する';
     }
