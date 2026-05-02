@@ -557,6 +557,10 @@ body.font-large { --font-scale: 1.15; }
         <p class="consult-output-title">今のあなたへ</p>
         <p class="consult-output-text" id="consult-output-text"></p>
       </div>
+      <div id="compat-suggest" style="display:none; margin-top:20px; padding:20px 22px; border-radius:14px; background:rgba(201,168,76,0.07); border:1px solid rgba(201,168,76,0.28); text-align:center;">
+        <p style="font-family:'Noto Serif JP',serif; font-size:calc(14px * var(--font-scale,1)); color:#b4a7d8; letter-spacing:0.1em; margin-bottom:12px;">相手との関係をさらに深く読み解きます</p>
+        <button class="btn-paid" id="compatSuggestBtn" type="button" style="margin-top:0;">お相手との相性も鑑定できます（300円）</button>
+      </div>
       <button class="btn-secondary" id="backToResultBtn" type="button">← 診断結果に戻る</button>
     </div>
 
@@ -1190,27 +1194,24 @@ function buildConsultPromptPayload() {
  * 実際にAPIへデータを送信（POST）し、AIからの返答を受け取る関数です。
  */
 async function generateConsultMessage(payload) {
-  // fetchを使って、指定したURL(API)にデータを送信します
   const response = await fetch(CONSULT_API_ENDPOINT, {
-    method: 'POST', // データを送信するためPOSTメソッドを使用します
-    headers: { 'Content-Type': 'application/json' }, // データ形式がJSONであることを伝えます
-    body: JSON.stringify(payload) // データをJSON形式の文字列に変換して送信します
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
   });
 
-  // もし通信が失敗した場合は、エラーを投げます
   if (!response.ok) {
     const errorText = await response.text();
     throw new Error(errorText || '相談文の生成に失敗しました');
   }
 
-  // 通信が成功した場合、返ってきたデータをJSONとして読み込みます
   const data = await response.json();
   if (!data || !data.message) {
     throw new Error('生成結果が空でした');
   }
 
-  // 最終的なAIのメッセージを返します
-  return data.message;
+  // message と showCompat（相性ボタン表示フラグ）を両方返す
+  return { message: data.message, showCompat: data.showCompat ?? false };
 }
 
 /**
@@ -1246,9 +1247,12 @@ if (organizeBtn) {
 
     // 4. APIと通信して、結果を受け取ります
     try {
-      const message = await generateConsultMessage(payload); // API呼び出し
+      const { message, showCompat } = await generateConsultMessage(payload); // API呼び出し
       outputText.textContent = message; // 返ってきたメッセージを画面に表示
-      
+
+      // AIが判定した相性ボタン表示フラグをそのまま使う
+      document.getElementById('compat-suggest').style.display = showCompat ? 'block' : 'none';
+
       // 結果が見やすいように画面をスクロールさせます
       output.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } catch (error) {
@@ -1270,6 +1274,23 @@ if (backToResultBtn) {
   });
 }
 
+// 相性鑑定ボタン（相談結果の下に出るやつ）→ 相性セクションへ誘導
+const compatSuggestBtn = document.getElementById('compatSuggestBtn');
+if (compatSuggestBtn) {
+  compatSuggestBtn.addEventListener('click', function() {
+    // paidContentが非表示なら先に開く
+    document.getElementById('paidContent').style.display = 'block';
+    const compatSection = document.getElementById('compat-section');
+    compatSection.classList.remove('hidden');
+    // 相手情報の表示を更新
+    if (currentDiagnosis) {
+      document.getElementById('compat-person').textContent = document.getElementById('consult-person').textContent;
+      document.getElementById('compat-base').textContent = document.getElementById('consult-base').textContent;
+    }
+    compatSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+}
+
 
 function resetForm() {
   document.getElementById('result-section').classList.add('hidden');
@@ -1283,6 +1304,7 @@ function resetForm() {
   document.getElementById('compat-section').classList.add('hidden');
   document.getElementById('compat-result').classList.add('hidden');
   document.getElementById('consult-output').style.display = 'none';
+  document.getElementById('compat-suggest').style.display = 'none';
   document.getElementById('consult-worry').value = '';
   document.getElementById('consult-hope').value = '';
   document.getElementById('consult-feeling').value = '';
