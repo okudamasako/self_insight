@@ -859,7 +859,13 @@ document.getElementById('paidBtn').addEventListener('click', async function() {
     const res = await fetch('/api/create-checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type: 'paid', metadata: { zodiac: currentDiagnosis?.zodiac || '', lifePath: String(currentDiagnosis?.lifePath || '') } })
+      body: JSON.stringify({ type: 'paid', metadata: {
+        zodiac: currentDiagnosis?.zodiac || '',
+        lifePath: String(currentDiagnosis?.lifePath || ''),
+        year: String(parseInt(yearSel.value)),
+        month: String(parseInt(monthSel.value)),
+        day: String(parseInt(daySel.value))
+      }})
     });
     const data = await res.json();
     if (data.url) {
@@ -887,7 +893,13 @@ if (openConsultBtn) {
       const res = await fetch('/api/create-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'consult', metadata: { zodiac: currentDiagnosis?.zodiac || '', lifePath: String(currentDiagnosis?.lifePath || '') } })
+        body: JSON.stringify({ type: 'consult', metadata: {
+        zodiac: currentDiagnosis?.zodiac || '',
+        lifePath: String(currentDiagnosis?.lifePath || ''),
+        year: String(parseInt(yearSel.value)),
+        month: String(parseInt(monthSel.value)),
+        day: String(parseInt(daySel.value))
+      }})
       });
       const data = await res.json();
       if (data.url) {
@@ -1033,14 +1045,13 @@ function getCompatScore(s1, s2) {
   return { score: 65 + (hash % 26), compat: '異なる個性を持つふたりです。時間をかけるほどに相手の良さが見えてきます。', gap: 'コミュニケーションのスタイルが違うため、意図が伝わりにくい場面がありそうです。' };
 }
 
-// 決済完了後の処理（URLパラメータを確認）
+// 決済完了後の処理（URLパラメータを確認して自動復元）
 async function checkPaymentReturn() {
   const params = new URLSearchParams(window.location.search);
   const sessionId = params.get('session_id');
   const type = params.get('type');
   if (!sessionId || !type) return;
 
-  // URLをクリーンにする
   window.history.replaceState({}, '', '/');
 
   try {
@@ -1053,29 +1064,97 @@ async function checkPaymentReturn() {
     if (!data.paid) return;
 
     const meta = data.metadata || {};
+    const year = parseInt(meta.year);
+    const month = parseInt(meta.month);
+    const day = parseInt(meta.day);
 
-    if (type === 'paid' && meta.zodiac) {
-      // 生年月日が不明なのでダミーで診断を復元できないため、セッション情報を案内
-      alert('お支払いありがとうございます。診断結果ページから「さらに詳しく読む」の内容が開放されています。もう一度生年月日を入力して診断してください。');
-    }
+    // 生年月日が復元できる場合は自動で診断を実行
+    if (year && month && day) {
+      // セレクトに値をセット
+      yearSel.value = year;
+      monthSel.value = month;
+      updateDays();
+      daySel.value = day;
 
-    if (type === 'consult' && meta.zodiac) {
-      alert('お支払いありがとうございます。生年月日を再入力して、「今の気持ちを整理する」ボタンから相談を始めてください。');
-    }
+      // 診断結果を表示
+      showResult(year, month, day);
 
-    if (type === 'compat' && meta.zodiac && meta.compatYear) {
-      // 相性結果を表示するためにセッションストレージに保存
-      sessionStorage.setItem('compatPaid', JSON.stringify(meta));
-      alert('お支払いありがとうございます。生年月日を再入力後、相性診断の結果が表示されます。');
-    }
+      // 少し待ってから該当コンテンツを開放
+      setTimeout(() => {
+        if (type === 'paid') {
+          document.getElementById('paidContent').style.display = 'block';
+          const btn = document.getElementById('paidBtn');
+          btn.textContent = '表示中';
+          btn.disabled = true;
+          document.getElementById('paidContent').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
 
-    if (type === 'compatConsult' && meta.zodiac) {
-      alert('お支払いありがとうございます。生年月日を再入力して、相談ページからご利用ください。');
+        if (type === 'consult') {
+          document.getElementById('paidContent').style.display = 'block';
+          const consultSection = document.getElementById('consult-section');
+          consultSection.classList.remove('hidden');
+          document.getElementById('consult-person').textContent = `${year}年 ${month}月 ${day}日 生まれ`;
+          const zodiac = getZodiac(month, day);
+          const lifePath = getLifePath(year, month, day);
+          document.getElementById('consult-base').textContent = `${zodiac.name} × 数秘${lifePath}`;
+          consultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        if (type === 'compat') {
+          document.getElementById('paidContent').style.display = 'block';
+          const compatSection = document.getElementById('compat-section');
+          compatSection.classList.remove('hidden');
+          // 相手の生年月日を復元
+          if (meta.compatYear && meta.compatMonth && meta.compatDay) {
+            compatYearSel.value = meta.compatYear;
+            compatMonthSel.value = meta.compatMonth;
+            updateCompatDays();
+            compatDaySel.value = meta.compatDay;
+            // 相性結果を自動表示
+            showCompatResult(
+              parseInt(meta.compatYear),
+              parseInt(meta.compatMonth),
+              parseInt(meta.compatDay)
+            );
+          }
+          compatSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        if (type === 'compatConsult') {
+          document.getElementById('paidContent').style.display = 'block';
+          const consultSection = document.getElementById('consult-section');
+          consultSection.classList.remove('hidden');
+          document.getElementById('consult-person').textContent = `${year}年 ${month}月 ${day}日 生まれ`;
+          const zodiac = getZodiac(month, day);
+          const lifePath = getLifePath(year, month, day);
+          document.getElementById('consult-base').textContent = `${zodiac.name} × 数秘${lifePath}`;
+          consultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 800);
     }
 
   } catch (e) {
     console.error('Payment verify error:', e);
   }
+}
+
+// 相性結果表示関数
+function showCompatResult(tYear, tMonth, tDay) {
+  const myZodiac = currentDiagnosis?.zodiac;
+  if (!myZodiac) return;
+  const tZodiac = getZodiac(tMonth, tDay);
+  const tLifePath = getLifePath(tYear, tMonth, tDay);
+  const myLifePath = currentDiagnosis?.lifePath;
+  const c = getCompatScore(myZodiac, tZodiac.name);
+
+  document.getElementById('compat-pair-label').textContent = `${myZodiac} × ${tZodiac.name}`;
+  document.getElementById('compat-score-num').textContent = c.score;
+  document.getElementById('compat-bar').style.width = c.score + '%';
+  document.getElementById('compat-text').textContent = c.compat;
+  document.getElementById('compat-gap-text').textContent = c.gap;
+  document.getElementById('compat-consult-desc').textContent =
+    `${myZodiac}×数秘${myLifePath}のあなたと、${tZodiac.name}×数秘${tLifePath}の相手。ふたりの間で今起きていることを教えていただければ、より具体的なアドバイスをお伝えできます。`;
+  document.getElementById('compat-result').classList.remove('hidden');
 }
 
 checkPaymentReturn();
