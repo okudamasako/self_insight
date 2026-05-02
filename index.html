@@ -974,6 +974,9 @@ if (compatBtn) {
           metadata: {
             zodiac: currentDiagnosis?.zodiac || '',
             lifePath: String(currentDiagnosis?.lifePath || ''),
+            year: String(parseInt(yearSel.value)),
+            month: String(parseInt(monthSel.value)),
+            day: String(parseInt(daySel.value)),
             compatYear: compatYearSel.value,
             compatMonth: compatMonthSel.value,
             compatDay: compatDaySel.value
@@ -1006,7 +1009,13 @@ if (compatConsultBtn) {
       const res = await fetch('/api/create-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'compatConsult', metadata: { zodiac: currentDiagnosis?.zodiac || '', lifePath: String(currentDiagnosis?.lifePath || '') } })
+        body: JSON.stringify({ type: 'compatConsult', metadata: {
+          zodiac: currentDiagnosis?.zodiac || '',
+          lifePath: String(currentDiagnosis?.lifePath || ''),
+          year: String(parseInt(yearSel.value)),
+          month: String(parseInt(monthSel.value)),
+          day: String(parseInt(daySel.value))
+        } })
       });
       const data = await res.json();
       if (data.url) {
@@ -1083,8 +1092,8 @@ async function checkPaymentReturn() {
       // 診断結果を表示
       showResult(year, month, day);
 
-      // 少し待ってから該当コンテンツを開放
-      setTimeout(() => {
+      // DOM描画完了を待ってからスクロール・コンテンツ開放
+      requestAnimationFrame(() => requestAnimationFrame(() => {
         if (type === 'paid') {
           document.getElementById('paidContent').style.display = 'block';
           const btn = document.getElementById('paidBtn');
@@ -1108,13 +1117,11 @@ async function checkPaymentReturn() {
           document.getElementById('paidContent').style.display = 'block';
           const compatSection = document.getElementById('compat-section');
           compatSection.classList.remove('hidden');
-          // 相手の生年月日を復元
           if (meta.compatYear && meta.compatMonth && meta.compatDay) {
             compatYearSel.value = meta.compatYear;
             compatMonthSel.value = meta.compatMonth;
             updateCompatDays();
             compatDaySel.value = meta.compatDay;
-            // 相性結果を自動表示
             showCompatResult(
               parseInt(meta.compatYear),
               parseInt(meta.compatMonth),
@@ -1134,7 +1141,7 @@ async function checkPaymentReturn() {
           document.getElementById('consult-base').textContent = `${zodiac.name} × 数秘${lifePath}`;
           consultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-      }, 800);
+      }));
     }
 
   } catch (e) {
