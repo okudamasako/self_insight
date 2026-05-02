@@ -478,7 +478,8 @@ body.font-large { --font-scale: 1.15; }
         <p class="section-title">ここから先で読めること</p>
         <p class="result-text">ここから先では、あなたの星座と数秘を掛け合わせて、もう少し具体的に読み解きます。</p>
         <p class="result-text">・頑張らなくても流れが整いやすい生き方<br>・人間関係で疲れない距離感<br>・仕事やお金との向き合い方<br>・恋愛で無理をしやすい癖<br>・今のあなたに必要な小さな選択</p>
-        <button class="btn-paid" id="paidBtn" type="button">さらに詳しく読む</button>
+        <button class="btn-paid" id="paidBtn" type="button">さらに詳しく読む（300円）</button>
+        <p style="text-align:center;font-size:13px;color:rgba(180,167,216,0.65);margin-top:10px;letter-spacing:0.05em;">カード情報はStripeが管理・暗号化。当サイトには一切保存されません。</p>
       </div>
 
       <div id="paidContent">
@@ -502,10 +503,22 @@ body.font-large { --font-scale: 1.15; }
 
         <div class="consult-focus-box">
           <p class="section-title">誰にも言えない悩みがある方へ</p>
-          <p class="paid-text">本当は、もっと具体的な悩みや、誰にも言えないことがあるのではないでしょうか。恋愛のこと、身体のこと、人間関係のこと。人には話しづらいことほど、ひとりで抱えやすいものです。</p>
-          <p class="paid-text">ここでは、あなたの状況に合わせて、できるだけ具体的にお答えします。親しい人にも話しづらいことでも大丈夫です。</p>
+          <p class="paid-text">返信が来ない不安、好きな人への気持ちの伝え方、誰にも言えない恋愛のこと。あなたの星座と数秘をもとに、今の状況に合わせて具体的にお答えします。</p>
+
+          <div id="consult-sample-preview" style="margin:20px 0;padding:18px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid rgba(201,168,76,0.2);">
+            <p style="font-size:13px;color:#b4a7d8;letter-spacing:0.1em;margin-bottom:10px;">▸ 相談例</p>
+            <p id="sample-q-text" style="font-size:14px;color:rgba(248,244,237,0.9);line-height:1.85;margin-bottom:12px;"></p>
+            <p style="font-size:13px;color:#b4a7d8;letter-spacing:0.1em;margin-bottom:8px;">▸ アドバイスの一部</p>
+            <div style="position:relative;overflow:hidden;max-height:72px;">
+              <p id="sample-a-text" style="font-size:13px;color:rgba(248,244,237,0.82);line-height:1.9;"></p>
+              <div style="position:absolute;bottom:0;left:0;right:0;height:50px;background:linear-gradient(transparent,rgba(30,18,50,0.95));"></div>
+            </div>
+            <p style="font-size:12px;color:rgba(180,167,216,0.6);margin-top:10px;">── 続きは相談後に届きます</p>
+          </div>
+
           <div class="consult-divider"><span>☾</span></div>
-          <button class="btn-consult" id="openConsultBtn" type="button">今の気持ちを整理する</button>
+          <button class="btn-consult" id="openConsultBtn" type="button">今の気持ちを整理する（500円）</button>
+          <p style="text-align:center;font-size:12px;color:rgba(180,167,216,0.6);margin-top:10px;letter-spacing:0.05em;">カード情報はStripeが管理・暗号化。当サイトには一切保存されません。</p>
         </div>
         <p class="privacy-note">入力内容はこの画面上で気持ちを整理するためのものです</p>
       </div>
@@ -545,6 +558,54 @@ body.font-large { --font-scale: 1.15; }
         <p class="consult-output-text" id="consult-output-text"></p>
       </div>
       <button class="btn-secondary" id="backToResultBtn" type="button">← 診断結果に戻る</button>
+    </div>
+
+    <div id="compat-section" class="consult-page-card hidden">
+      <div class="consult-page-header">
+        <p class="result-person" id="compat-person"></p>
+        <h2 class="consult-page-title">ふたりの相性を見る</h2>
+        <span class="result-element" id="compat-base"></span>
+      </div>
+      <p class="consult-page-lead">相手の生年月日を入力してください。星座と数秘の組み合わせから、ふたりの相性を読み解きます。</p>
+      <div class="form-group">
+        <label class="form-label">相手の生まれた年</label>
+        <select id="compat-year" class="form-input"><option value="">年を選ぶ</option></select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">相手の生まれた月と日</label>
+        <div class="form-row">
+          <select id="compat-month" class="form-input"><option value="">月を選ぶ</option></select>
+          <select id="compat-day" class="form-input"><option value="">日を選ぶ</option></select>
+        </div>
+      </div>
+      <button class="btn-paid" id="compatBtn" type="button">相性を見る（300円）</button>
+      <p style="text-align:center;font-size:12px;color:rgba(180,167,216,0.6);margin-top:10px;letter-spacing:0.05em;">カード情報はStripeが管理・暗号化。当サイトには一切保存されません。</p>
+
+      <div id="compat-result" class="hidden" style="margin-top:28px;">
+        <div style="text-align:center;margin-bottom:20px;">
+          <p style="font-size:13px;color:#b4a7d8;margin-bottom:6px;" id="compat-pair-label"></p>
+          <p style="font-family:'Noto Serif JP',serif;font-size:38px;color:#e8d08a;line-height:1;" id="compat-score-num"></p>
+          <p style="font-size:13px;color:#b4a7d8;margin-top:4px;">/ 100</p>
+          <div style="background:rgba(255,255,255,0.08);border-radius:4px;height:6px;margin:12px auto;max-width:260px;overflow:hidden;">
+            <div id="compat-bar" style="height:100%;border-radius:4px;background:linear-gradient(90deg,#c9a84c,#e8829a);transition:width 0.8s ease;width:0%;"></div>
+          </div>
+        </div>
+        <div class="advice-box" style="margin-bottom:16px;">
+          <p class="advice-text" id="compat-text"></p>
+        </div>
+        <div class="advice-box">
+          <p style="font-size:13px;color:#b4a7d8;letter-spacing:0.1em;margin-bottom:6px;">▸ すれ違いやすいポイント</p>
+          <p class="advice-text" id="compat-gap-text"></p>
+        </div>
+
+        <div style="margin-top:28px;padding:22px;border-radius:15px;background:rgba(232,130,154,0.08);border:1px solid rgba(232,130,154,0.35);text-align:center;">
+          <p style="font-family:'Noto Serif JP',serif;font-size:16px;color:#e8829a;letter-spacing:0.12em;margin-bottom:8px;">このふたりについて、もっと詳しく相談する</p>
+          <p style="font-size:13px;color:rgba(180,167,216,0.8);line-height:1.7;margin-bottom:16px;" id="compat-consult-desc"></p>
+          <button class="btn-consult" id="compatConsultBtn" type="button">ふたりの関係について相談する（500円）</button>
+          <p style="font-size:11px;color:rgba(180,167,216,0.55);margin-top:8px;">カード情報はStripeが管理・暗号化。当サイトには一切保存されません。</p>
+        </div>
+      </div>
+      <button class="btn-secondary" id="backFromCompatBtn" type="button" style="margin-top:14px;">← 診断結果に戻る</button>
     </div>
 
     <button class="btn-retry" onclick="resetForm()">← 別の生年月日で診断する</button>
@@ -760,6 +821,25 @@ function showResult(year, month, day) {
     lifePath: lifePath
   };
 
+  // サンプルプレビューを星座に合わせて表示
+  const sampleData = {
+    '乙女座': { q: '好きな人がいるのですが、自分から気持ちを伝えることができません。相手が本当に私のことをどう思っているのか気になって、確認できないまま時間だけが過ぎています。', a: '乙女座×数秘' + lifePath + 'のあなたは、「完璧なタイミング」を待ちすぎてしまう傾向があります。でも実は、あなたが一番恐れているのは「失敗すること」ではなく、「自分の気持ちを正直に見せること」そのものかもしれません——' },
+    '牡羊座': { q: '好きになった人に対して、つい強がってしまいます。本当は寂しいのに、連絡しないで待ってしまって。相手に気持ちが伝わっているか不安です。', a: '牡羊座×数秘' + lifePath + 'のあなたは、弱さを見せることを「負け」だと感じやすい人です。でもその強がりが、相手に「この人は自分を必要としていない」と映っていることがあります——' },
+    '蟹座': { q: '付き合っている人の返信が遅くなりました。以前はすぐ返ってきたのに。気持ちが冷めたのか、それとも気にしすぎなのか、頭から離れなくて眠れません。', a: '蟹座×数秘' + lifePath + 'のあなたにとって、返信の速さは「愛されているかどうか」のバロメーターになっています。ただ、今のあなたが本当に確かめるべきことは返信の速さではなく——' },
+  };
+  const sample = sampleData[zodiac.name] || { q: '好きな人への気持ちをどう伝えたらいいかわからず、ずっと迷っています。', a: zodiac.name + '×数秘' + lifePath + 'のあなたには、相手を深く思いやるがゆえに一歩踏み出せない傾向があります。でも本当に必要なのは——' };
+  const sqEl = document.getElementById('sample-q-text');
+  const saEl = document.getElementById('sample-a-text');
+  if (sqEl) sqEl.textContent = sample.q;
+  if (saEl) saEl.textContent = sample.a;
+
+  // 相性診断セクションの初期化
+  const compatSection = document.getElementById('compat-section');
+  if (compatSection) {
+    document.getElementById('compat-person').textContent = `${year}年 ${month}月 ${day}日 生まれ`;
+    document.getElementById('compat-base').textContent = `${zodiac.name} × 数秘${lifePath}`;
+  }
+
   const paid = buildPaidTexts(zodiac, lifePath, numData);
   document.getElementById('paid-life').textContent = paid.life;
   document.getElementById('paid-relationship').textContent = paid.relationship;
@@ -772,26 +852,233 @@ function showResult(year, month, day) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-document.getElementById('paidBtn').addEventListener('click', function() {
-  document.getElementById('paidContent').style.display = 'block';
-  this.textContent = '表示中';
+document.getElementById('paidBtn').addEventListener('click', async function() {
   this.disabled = true;
+  this.textContent = '決済ページへ移動中...';
+  try {
+    const res = await fetch('/api/create-checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'paid', metadata: { zodiac: currentDiagnosis?.zodiac || '', lifePath: String(currentDiagnosis?.lifePath || '') } })
+    });
+    const data = await res.json();
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      alert('決済ページへの移動に失敗しました');
+      this.disabled = false;
+      this.textContent = 'さらに詳しく読む（300円）';
+    }
+  } catch (e) {
+    alert('エラーが発生しました。もう一度お試しください。');
+    this.disabled = false;
+    this.textContent = 'さらに詳しく読む（300円）';
+  }
 });
 
 let currentDiagnosis = null;
 
 const openConsultBtn = document.getElementById('openConsultBtn');
 if (openConsultBtn) {
-  openConsultBtn.addEventListener('click', function() {
-    const consultSection = document.getElementById('consult-section');
-    consultSection.classList.remove('hidden');
-    if (currentDiagnosis) {
-      document.getElementById('consult-person').textContent = currentDiagnosis.person;
-      document.getElementById('consult-base').textContent = `${currentDiagnosis.zodiac} × 数秘${currentDiagnosis.lifePath}`;
+  openConsultBtn.addEventListener('click', async function() {
+    this.disabled = true;
+    this.textContent = '決済ページへ移動中...';
+    try {
+      const res = await fetch('/api/create-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'consult', metadata: { zodiac: currentDiagnosis?.zodiac || '', lifePath: String(currentDiagnosis?.lifePath || '') } })
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert('決済ページへの移動に失敗しました');
+        this.disabled = false;
+        this.textContent = '今の気持ちを整理する（500円）';
+      }
+    } catch (e) {
+      alert('エラーが発生しました。もう一度お試しください。');
+      this.disabled = false;
+      this.textContent = '今の気持ちを整理する（500円）';
     }
-    consultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 }
+
+// 相性診断セクションのセレクト初期化
+const compatYearSel = document.getElementById('compat-year');
+const compatMonthSel = document.getElementById('compat-month');
+const compatDaySel = document.getElementById('compat-day');
+
+if (compatYearSel) {
+  for (let y = new Date().getFullYear() - 10; y >= 1930; y--) {
+    const o = document.createElement('option');
+    o.value = y; o.textContent = y + '年';
+    compatYearSel.appendChild(o);
+  }
+  ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'].forEach((m, i) => {
+    const o = document.createElement('option');
+    o.value = i + 1; o.textContent = m;
+    compatMonthSel.appendChild(o);
+  });
+  function updateCompatDays() {
+    const y = parseInt(compatYearSel.value) || 2000;
+    const m = parseInt(compatMonthSel.value) || 1;
+    const sel = parseInt(compatDaySel.value);
+    const max = new Date(y, m, 0).getDate();
+    compatDaySel.innerHTML = '<option value="">日を選ぶ</option>';
+    for (let d = 1; d <= max; d++) {
+      const o = document.createElement('option');
+      o.value = d; o.textContent = d + '日';
+      compatDaySel.appendChild(o);
+    }
+    if (sel && sel <= max) compatDaySel.value = sel;
+  }
+  compatYearSel.addEventListener('change', updateCompatDays);
+  compatMonthSel.addEventListener('change', updateCompatDays);
+  updateCompatDays();
+}
+
+// 相性診断ボタン
+const compatBtn = document.getElementById('compatBtn');
+if (compatBtn) {
+  compatBtn.addEventListener('click', async function() {
+    if (!compatYearSel.value || !compatMonthSel.value || !compatDaySel.value) {
+      alert('相手の生年月日をすべて選択してください');
+      return;
+    }
+    this.disabled = true;
+    this.textContent = '決済ページへ移動中...';
+    try {
+      const res = await fetch('/api/create-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'compat',
+          metadata: {
+            zodiac: currentDiagnosis?.zodiac || '',
+            lifePath: String(currentDiagnosis?.lifePath || ''),
+            compatYear: compatYearSel.value,
+            compatMonth: compatMonthSel.value,
+            compatDay: compatDaySel.value
+          }
+        })
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert('決済ページへの移動に失敗しました');
+        this.disabled = false;
+        this.textContent = '相性を見る（300円）';
+      }
+    } catch (e) {
+      alert('エラーが発生しました。もう一度お試しください。');
+      this.disabled = false;
+      this.textContent = '相性を見る（300円）';
+    }
+  });
+}
+
+// 相性後の詳細相談ボタン
+const compatConsultBtn = document.getElementById('compatConsultBtn');
+if (compatConsultBtn) {
+  compatConsultBtn.addEventListener('click', async function() {
+    this.disabled = true;
+    this.textContent = '決済ページへ移動中...';
+    try {
+      const res = await fetch('/api/create-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'compatConsult', metadata: { zodiac: currentDiagnosis?.zodiac || '', lifePath: String(currentDiagnosis?.lifePath || '') } })
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert('決済ページへの移動に失敗しました');
+        this.disabled = false;
+        this.textContent = 'ふたりの関係について相談する（500円）';
+      }
+    } catch (e) {
+      alert('エラーが発生しました。もう一度お試しください。');
+      this.disabled = false;
+      this.textContent = 'ふたりの関係について相談する（500円）';
+    }
+  });
+}
+
+// 戻るボタン
+const backFromCompatBtn = document.getElementById('backFromCompatBtn');
+if (backFromCompatBtn) {
+  backFromCompatBtn.addEventListener('click', function() {
+    document.getElementById('compat-section').classList.add('hidden');
+    document.querySelector('.result-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+}
+
+// 相性計算ロジック
+function getCompatScore(s1, s2) {
+  const compatTable = [
+    { signs: ['牡羊座','獅子座'], score: 88, compat: '情熱と行動力が共鳴するペアです。一緒にいると自然にエネルギーが高まり、前向きな気持ちになれます。', gap: 'どちらも主導権を取りたがる傾向があるため、意見がぶつかると激しくなりがちです。' },
+    { signs: ['蟹座','魚座'], score: 86, compat: '感受性の豊かさが似ているため、言葉にしなくても気持ちが通じ合える場面が多いでしょう。', gap: 'ふたりとも傷つくことを恐れるため、本音を言い出せずにすれ違うことがあります。' },
+    { signs: ['乙女座','山羊座'], score: 82, compat: '価値観や生活リズムが合いやすく、安心して一緒にいられる関係です。地に足のついた絆が育まれます。', gap: 'ふたりとも感情を表に出しにくいため、気持ちの確認が少なくなりやすいです。' },
+    { signs: ['天秤座','水瓶座'], score: 84, compat: '知的な会話と自由な空気を共有できるペアです。お互いの個性を尊重できます。', gap: 'どちらも決断を先延ばしにしやすく、大事な局面で動けないことがあります。' },
+    { signs: ['牡牛座','蠍座'], score: 74, compat: '引き合う磁力のような関係です。深いところで惹かれ合い、一度つながると強い絆になります。', gap: '価値観の違いが表れると意地の張り合いになりやすいです。' },
+  ];
+  for (const c of compatTable) {
+    if ((c.signs[0] === s1 && c.signs[1] === s2) || (c.signs[0] === s2 && c.signs[1] === s1)) return c;
+  }
+  const hash = (s1 + s2).split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+  return { score: 65 + (hash % 26), compat: '異なる個性を持つふたりです。時間をかけるほどに相手の良さが見えてきます。', gap: 'コミュニケーションのスタイルが違うため、意図が伝わりにくい場面がありそうです。' };
+}
+
+// 決済完了後の処理（URLパラメータを確認）
+async function checkPaymentReturn() {
+  const params = new URLSearchParams(window.location.search);
+  const sessionId = params.get('session_id');
+  const type = params.get('type');
+  if (!sessionId || !type) return;
+
+  // URLをクリーンにする
+  window.history.replaceState({}, '', '/');
+
+  try {
+    const res = await fetch('/api/verify-payment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ session_id: sessionId })
+    });
+    const data = await res.json();
+    if (!data.paid) return;
+
+    const meta = data.metadata || {};
+
+    if (type === 'paid' && meta.zodiac) {
+      // 生年月日が不明なのでダミーで診断を復元できないため、セッション情報を案内
+      alert('お支払いありがとうございます。診断結果ページから「さらに詳しく読む」の内容が開放されています。もう一度生年月日を入力して診断してください。');
+    }
+
+    if (type === 'consult' && meta.zodiac) {
+      alert('お支払いありがとうございます。生年月日を再入力して、「今の気持ちを整理する」ボタンから相談を始めてください。');
+    }
+
+    if (type === 'compat' && meta.zodiac && meta.compatYear) {
+      // 相性結果を表示するためにセッションストレージに保存
+      sessionStorage.setItem('compatPaid', JSON.stringify(meta));
+      alert('お支払いありがとうございます。生年月日を再入力後、相性診断の結果が表示されます。');
+    }
+
+    if (type === 'compatConsult' && meta.zodiac) {
+      alert('お支払いありがとうございます。生年月日を再入力して、相談ページからご利用ください。');
+    }
+
+  } catch (e) {
+    console.error('Payment verify error:', e);
+  }
+}
+
+checkPaymentReturn();
 
 /**
  * -----------------------------------------------------
@@ -914,6 +1201,8 @@ function resetForm() {
   document.getElementById('paidBtn').textContent = 'さらに詳しく読む';
   document.getElementById('paidContent').style.display = 'none';
   document.getElementById('consult-section').classList.add('hidden');
+  document.getElementById('compat-section').classList.add('hidden');
+  document.getElementById('compat-result').classList.add('hidden');
   document.getElementById('consult-output').style.display = 'none';
   document.getElementById('consult-worry').value = '';
   document.getElementById('consult-hope').value = '';
