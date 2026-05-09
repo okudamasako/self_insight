@@ -282,30 +282,6 @@ button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 .consult-output { display: none; margin-top: 26px; padding: 22px; border-radius: 15px; background: rgba(201,168,76,0.075); border-left: 2px solid #c9a84c; }
 .consult-output-title { font-family: 'Noto Serif JP', serif; font-size: calc(17px * var(--font-scale, 1)); color: #e8d08a; letter-spacing: 0.14em; margin-bottom: 12px; }
 .consult-output-text { font-size: calc(16px * var(--font-scale, 1)); color: rgba(248,244,237,0.88); line-height: 1.95; white-space: pre-line; }
-
-/* 「少し楽になるために」セクション内の段落ブロック */
-#consult-relief-text p {
-  margin-bottom: 1.2em;
-}
-#consult-relief-section .relief-block {
-  background: rgba(255,255,255,0.035);
-  border-radius: 10px;
-  padding: 16px 18px;
-  margin-bottom: 14px;
-  border-left: 2px solid rgba(201,168,76,0.5);
-}
-#consult-relief-section .relief-block-label {
-  font-size: calc(13px * var(--font-scale,1));
-  color: #b4a7d8;
-  letter-spacing: 0.1em;
-  margin-bottom: 7px;
-}
-#consult-relief-section .relief-block-text {
-  font-size: calc(15px * var(--font-scale,1));
-  color: rgba(248,244,237,0.9);
-  line-height: 1.95;
-  white-space: pre-line;
-}
 .btn-secondary { width: 100%; background: transparent; border: 1px solid rgba(201,168,76,0.4); border-radius: 12px; color: #b4a7d8; font-family: 'Zen Kaku Gothic New', sans-serif; font-size: calc(16px * var(--font-scale, 1)); padding: 14px; cursor: pointer; letter-spacing: 0.1em; margin-top: 14px; }
 
 
@@ -506,28 +482,6 @@ body.font-large { --font-scale: 1.15; }
         <p style="text-align:center;font-size:13px;color:rgba(180,167,216,0.65);margin-top:10px;letter-spacing:0.05em;">カード情報はStripeが管理・暗号化。当サイトには一切保存されません。</p>
       </div>
 
-      <!-- 500円相談バナーを支払い前でも見えるようにpaidContentの外に移動 -->
-      <div class="consult-focus-box" id="consult-cta-area">
-        <p class="section-title">誰にも言えない悩みがある方へ</p>
-        <p class="paid-text">返信が来ない不安、好きな人への気持ちの伝え方、誰にも言えない恋愛のこと。あなたの星座と数秘をもとに、今の状況に合わせて具体的にお答えします。</p>
-
-        <div id="consult-sample-preview" style="margin:20px 0;padding:18px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid rgba(201,168,76,0.2);">
-          <p style="font-size:13px;color:#b4a7d8;letter-spacing:0.1em;margin-bottom:10px;">▸ 相談例</p>
-          <p id="sample-q-text" style="font-size:14px;color:rgba(248,244,237,0.9);line-height:1.85;margin-bottom:12px;"></p>
-          <p style="font-size:13px;color:#b4a7d8;letter-spacing:0.1em;margin-bottom:8px;">▸ アドバイスの一部</p>
-          <div style="position:relative;overflow:hidden;max-height:72px;">
-            <p id="sample-a-text" style="font-size:13px;color:rgba(248,244,237,0.82);line-height:1.9;"></p>
-            <div style="position:absolute;bottom:0;left:0;right:0;height:50px;background:linear-gradient(transparent,rgba(30,18,50,0.95));"></div>
-          </div>
-          <p style="font-size:12px;color:rgba(180,167,216,0.6);margin-top:10px;">── 続きは相談後に届きます</p>
-        </div>
-
-        <div class="consult-divider"><span>☾</span></div>
-        <button class="btn-consult" id="openConsultBtn" type="button">今の気持ちを整理する（500円）</button>
-        <p style="text-align:center;font-size:12px;color:rgba(180,167,216,0.6);margin-top:10px;letter-spacing:0.05em;">カード情報はStripeが管理・暗号化。当サイトには一切保存されません。</p>
-        <p class="privacy-note">入力内容はこの画面上で気持ちを整理するためのものです</p>
-      </div>
-
       <div id="paidContent">
         <p class="section-title">頑張らない生き方</p>
         <div class="paid-box"><p class="paid-text" id="paid-life"></p></div>
@@ -545,6 +499,28 @@ body.font-large { --font-scale: 1.15; }
           <h3 class="deep-consult-title">さらに深く知りたいあなたへ</h3>
           <p class="deep-consult-subtitle">あなたの本当のこと、もっと詳しくお話ししませんか？</p>
           <div class="deep-consult-ornament">✦</div>
+        </div>
+
+        <!-- ★ 300円コンテンツ解放後にのみ表示。この位置を変更しないこと ★ -->
+        <div class="consult-focus-box" id="consult-cta-area">
+          <p class="section-title">誰にも言えない悩みがある方へ</p>
+          <p class="paid-text">返信が来ない不安、好きな人への気持ちの伝え方、誰にも言えない恋愛のこと。あなたの星座と数秘をもとに、今の状況に合わせて具体的にお答えします。</p>
+
+          <div id="consult-sample-preview" style="margin:20px 0;padding:18px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid rgba(201,168,76,0.2);">
+            <p style="font-size:13px;color:#b4a7d8;letter-spacing:0.1em;margin-bottom:10px;">▸ 相談例</p>
+            <p id="sample-q-text" style="font-size:14px;color:rgba(248,244,237,0.9);line-height:1.85;margin-bottom:12px;"></p>
+            <p style="font-size:13px;color:#b4a7d8;letter-spacing:0.1em;margin-bottom:8px;">▸ アドバイスの一部</p>
+            <div style="position:relative;overflow:hidden;max-height:72px;">
+              <p id="sample-a-text" style="font-size:13px;color:rgba(248,244,237,0.82);line-height:1.9;"></p>
+              <div style="position:absolute;bottom:0;left:0;right:0;height:50px;background:linear-gradient(transparent,rgba(30,18,50,0.95));"></div>
+            </div>
+            <p style="font-size:12px;color:rgba(180,167,216,0.6);margin-top:10px;">── 続きは相談後に届きます</p>
+          </div>
+
+          <div class="consult-divider"><span>☾</span></div>
+          <button class="btn-consult" id="openConsultBtn" type="button">今の気持ちを整理する（500円）</button>
+          <p style="text-align:center;font-size:12px;color:rgba(180,167,216,0.6);margin-top:10px;letter-spacing:0.05em;">カード情報はStripeが管理・暗号化。当サイトには一切保存されません。</p>
+          <p class="privacy-note">入力内容はこの画面上で気持ちを整理するためのものです</p>
         </div>
       </div>
     </div>
@@ -1224,20 +1200,6 @@ function showCompatResult(tYear, tMonth, tDay) {
 const CONSULT_API_ENDPOINT = '/api/consult';
 
 /**
- * 【バックエンド側への対応依頼】
- * /api/consult のレスポンスに以下の形式で `relief` フィールドを追加してください。
- *
- * {
- *   "message": "（今のあなたへ）共感・整理の文章。zodiac・number・worry・feelingを踏まえて4〜6段落程度。",
- *   "relief": "（少し楽になるために）goal入力内容を踏まえた具体的アドバイス。今できる小さな行動・無理を減らす考え方・気持ちの整理方法・自分を責めすぎない視点などを4〜6段落で。",
- *   "showCompat": true/false
- * }
- *
- * relief が返ってこない場合は、フロントエンド側のフォールバック関数（buildReliefFallback）が
- * goal の入力内容をもとにクライアント側でテキストを生成します。
- */
-
-/**
  * フォームに入力された値を集めて、APIに送信するためのデータ（ペイロード）を作ります。
  */
 function buildConsultPromptPayload() {
@@ -1304,32 +1266,27 @@ if (organizeBtn) {
     const reliefSection = document.getElementById('consult-relief-section');
     const reliefText = document.getElementById('consult-relief-text');
 
-    output.style.display = 'block'; // エリアを表示する
-    outputText.textContent = 'あなたの言葉を読み取りながら、気持ちを整理しています...'; // ローディング中のメッセージ
+    output.style.display = 'block';
+    outputText.textContent = 'あなたの言葉を読み取りながら、気持ちを整理しています...';
     reliefSection.style.display = 'none';
     reliefText.textContent = '';
-    
+
     // ボタンを無効化して、二重送信を防ぎます
     this.disabled = true;
     this.textContent = '整理しています...';
 
     // 4. APIと通信して、結果を受け取ります
     try {
-      const { message, relief, showCompat } = await generateConsultMessage(payload); // API呼び出し
-      outputText.textContent = message; // 返ってきたメッセージを画面に表示
+      const { message, relief, showCompat } = await generateConsultMessage(payload);
+      outputText.textContent = message;
 
       // 「少し楽になるために」セクションを表示
       if (relief) {
         reliefText.textContent = relief;
         reliefSection.style.display = 'block';
-      } else {
-        // APIが relief を返さない場合のフォールバック：goal の内容を元にクライアント側で生成
-        const goal = payload.goal;
-        if (goal) {
-          const fallback = buildReliefFallback(payload);
-          reliefText.textContent = fallback;
-          reliefSection.style.display = 'block';
-        }
+      } else if (payload.goal) {
+        reliefText.textContent = buildReliefFallback(payload);
+        reliefSection.style.display = 'block';
       }
 
       // AIが判定した相性ボタン表示フラグをそのまま使う
@@ -1375,52 +1332,24 @@ if (compatSuggestBtn) {
 
 
 /**
- * APIが relief フィールドを返さない場合のフォールバックとして、
- * 入力内容（zodiac, number, feeling, worry, goal）をもとに
- * 「少し楽になるために」テキストをクライアント側で組み立てます。
- * バックエンド側で relief を返すよう対応した場合はこの関数は呼ばれません。
+ * APIが relief フィールドを返さない場合のフォールバック。
+ * goal の入力内容をもとに「少し楽になるために」テキストをクライアント側で組み立てます。
  */
 function buildReliefFallback(payload) {
-  const { zodiac, number, feeling, worry, goal } = payload;
-
+  const { zodiac, number, feeling, goal } = payload;
   const feelingMap = {
-    '疲れている': { verb: '疲れを感じている', advice: '今は何かを達成しようとしなくていい時期かもしれません。まず「休むこと」を自分に許可することが、最初の一歩になります。' },
-    '不安': { verb: '不安を抱えている', advice: '不安は、何かを大切に思っているからこそ生まれます。その感覚は弱さではなく、あなたの誠実さの表れです。' },
-    '迷っている': { verb: '迷いの中にいる', advice: '迷っているということは、まだ選べる余地があるということ。今すぐ答えを出さなくても大丈夫です。' },
-    '寂しい': { verb: '寂しさを感じている', advice: 'その寂しさは、誰かとつながりたいという自然な気持ちです。小さなつながりを大切にすることが、じわじわと心を満たしていきます。' },
-    '怒っている': { verb: '怒りや苛立ちを感じている', advice: '怒りは「ここは違う」というあなたの内側からのサインです。その気持ちを否定せず、まずそっと受け取ってあげてください。' },
-    'わからない': { verb: 'どんな気持ちかもよくわからない状態にいる', advice: '「わからない」という状態そのものが、今のあなたの正直な気持ちです。無理に整理しなくても、時間が経つと少しずつ見えてくることがあります。' }
+    '疲れている': 'まず「休むこと」を自分に許可することが、最初の一歩になります。今は何かを達成しようとしなくていい時期かもしれません。',
+    '不安': '不安は、何かを大切に思っているからこそ生まれます。その感覚は弱さではなく、あなたの誠実さの表れです。',
+    '迷っている': '迷っているということは、まだ選べる余地があるということ。今すぐ答えを出さなくても大丈夫です。',
+    '寂しい': 'その寂しさは、誰かとつながりたいという自然な気持ちです。小さなつながりを大切にすることが、じわじわと心を満たしていきます。',
+    '怒っている': '怒りは「ここは違う」というあなたの内側からのサインです。その気持ちを否定せず、まずそっと受け取ってあげてください。',
+    'わからない': '「わからない」という状態そのものが、今のあなたの正直な気持ちです。無理に整理しなくても、時間が経つと少しずつ見えてくることがあります。'
   };
-
-  const fd = feelingMap[feeling] || { verb: 'さまざまな気持ちを抱えている', advice: '今感じていることをそのまま認めることが、整理の第一歩になります。' };
-
-  const goalText = goal
-    ? `「${goal}」という言葉を、あなたは書いてくれました。`
-    : 'どうなれば少し楽になるか、その感覚はまだぼんやりしているかもしれません。';
-
-  const zodiacAdvice = zodiac
-    ? `${zodiac}のあなたは、物事をしっかり受け止めようとする誠実さがあります。でもその誠実さが、時に自分への厳しさに向いてしまうことがあります。`
-    : '';
-
-  const numberAdvice = number
-    ? `数秘${number}の資質を持つあなたにとって、今の状況は特に神経を使う場面かもしれません。`
-    : '';
-
-  return `${goalText}
-その言葉の中に、今のあなたが本当に必要としているものが見えます。
-
-${fd.advice}
-
-${zodiacAdvice}
-${numberAdvice}
-
-今できる小さなことをひとつだけ考えるとしたら、「判断を明日に回す」こともひとつの選択です。すべてを今日解決しなければならないわけではありません。
-
-自分を責める声が出てきたときは、「それは本当のことか？」と一度立ち止まって聞いてみてください。責めることで何かが変わるなら意味がありますが、多くの場合、それはただ消耗するだけです。
-
-気持ちの整理は、きれいにまとめることが目的ではありません。少しだけ「今の自分はこういう状態なんだな」と気づけること、それだけで十分です。
-
-${fd.verb}今のあなたに、まずゆっくり息をしてほしいと思います。`.trim();
+  const feelingAdvice = feelingMap[feeling] || '今感じていることをそのまま認めることが、整理の第一歩になります。';
+  const goalText = goal ? `「${goal}」という言葉を、あなたは書いてくれました。\nその言葉の中に、今のあなたが本当に必要としているものが見えます。\n\n` : '';
+  const zodiacLine = zodiac ? `${zodiac}のあなたは、物事をしっかり受け止めようとする誠実さがあります。でもその誠実さが、時に自分への厳しさに向いてしまうことがあります。\n` : '';
+  const numberLine = number ? `数秘${number}の資質を持つあなたにとって、今の状況は特に神経を使う場面かもしれません。\n` : '';
+  return `${goalText}${feelingAdvice}\n\n${zodiacLine}${numberLine}\n今できる小さなことをひとつだけ考えるとしたら、「判断を明日に回す」こともひとつの選択です。すべてを今日解決しなければならないわけではありません。\n\n自分を責める声が出てきたときは、「それは本当のことか？」と一度立ち止まって聞いてみてください。責めることで何かが変わるなら意味がありますが、多くの場合、それはただ消耗するだけです。\n\n気持ちの整理は、きれいにまとめることが目的ではありません。少しだけ「今の自分はこういう状態なんだな」と気づけること、それだけで十分です。`.trim();
 }
 
 function resetForm() {
