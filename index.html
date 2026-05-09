@@ -571,6 +571,20 @@ body.font-large { --font-scale: 1.15; }
     </div>
 
     <div id="compat-section" class="consult-page-card hidden">
+
+      <!-- ★ 500円相談結果のサマリー（相性診断中も消えないように表示） ★ -->
+      <div id="compat-consult-summary" style="display:none; margin-bottom:28px; padding-bottom:26px; border-bottom:1px solid rgba(201,168,76,0.18);">
+        <p style="font-family:'Noto Serif JP',serif; font-size:calc(13px * var(--font-scale,1)); color:#b4a7d8; letter-spacing:0.12em; margin-bottom:14px;">― 先ほどの相談結果 ―</p>
+        <div style="background:rgba(201,168,76,0.055); border-left:2px solid #c9a84c; border-radius:0 10px 10px 0; padding:16px 18px; margin-bottom:14px;">
+          <p style="font-family:'Noto Serif JP',serif; font-size:calc(14px * var(--font-scale,1)); color:#e8d08a; letter-spacing:0.12em; margin-bottom:10px;">今のあなたへ</p>
+          <p id="compat-summary-message" style="font-size:calc(14px * var(--font-scale,1)); color:rgba(248,244,237,0.82); line-height:1.9; white-space:pre-line;"></p>
+        </div>
+        <div id="compat-summary-relief-wrap" style="display:none; background:rgba(201,168,76,0.055); border-left:2px solid rgba(201,168,76,0.5); border-radius:0 10px 10px 0; padding:16px 18px;">
+          <p style="font-family:'Noto Serif JP',serif; font-size:calc(14px * var(--font-scale,1)); color:#e8d08a; letter-spacing:0.12em; margin-bottom:10px;">少し楽になるために</p>
+          <p id="compat-summary-relief" style="font-size:calc(14px * var(--font-scale,1)); color:rgba(248,244,237,0.82); line-height:1.9; white-space:pre-line;"></p>
+        </div>
+      </div>
+
       <div id="compat-setup-area">
         <div class="consult-page-header">
           <p class="result-person" id="compat-person"></p>
@@ -1330,6 +1344,24 @@ if (compatSuggestBtn) {
       document.getElementById('compat-person').textContent = document.getElementById('consult-person').textContent;
       document.getElementById('compat-base').textContent = document.getElementById('consult-base').textContent;
     }
+
+    // 500円相談結果をサマリーエリアにコピーして相性画面でも表示する
+    const msgEl = document.getElementById('consult-output-text');
+    const reliefEl = document.getElementById('consult-relief-text');
+    const summaryWrap = document.getElementById('compat-consult-summary');
+    const summaryMsg = document.getElementById('compat-summary-message');
+    const summaryReliefWrap = document.getElementById('compat-summary-relief-wrap');
+    const summaryRelief = document.getElementById('compat-summary-relief');
+
+    if (msgEl && msgEl.textContent.trim()) {
+      summaryMsg.textContent = msgEl.textContent;
+      summaryWrap.style.display = 'block';
+    }
+    if (reliefEl && reliefEl.textContent.trim()) {
+      summaryRelief.textContent = reliefEl.textContent;
+      summaryReliefWrap.style.display = 'block';
+    }
+
     compatSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 }
@@ -1483,6 +1515,15 @@ function resetForm() {
   if (reliefSection) reliefSection.style.display = 'none';
   const reliefText = document.getElementById('consult-relief-text');
   if (reliefText) reliefText.textContent = '';
+  // 相性画面の相談サマリーもリセット
+  const compatSummary = document.getElementById('compat-consult-summary');
+  if (compatSummary) compatSummary.style.display = 'none';
+  const compatSummaryMsg = document.getElementById('compat-summary-message');
+  if (compatSummaryMsg) compatSummaryMsg.textContent = '';
+  const compatSummaryRelief = document.getElementById('compat-summary-relief');
+  if (compatSummaryRelief) compatSummaryRelief.textContent = '';
+  const compatSummaryReliefWrap = document.getElementById('compat-summary-relief-wrap');
+  if (compatSummaryReliefWrap) compatSummaryReliefWrap.style.display = 'none';
   // 非表示にした購入導線を再表示できるように戻す
   const consultCtaArea = document.getElementById('consult-cta-area');
   if (consultCtaArea) consultCtaArea.style.display = 'block';
