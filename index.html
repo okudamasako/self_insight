@@ -482,28 +482,6 @@ body.font-large { --font-scale: 1.15; }
         <p style="text-align:center;font-size:13px;color:rgba(180,167,216,0.65);margin-top:10px;letter-spacing:0.05em;">カード情報はStripeが管理・暗号化。当サイトには一切保存されません。</p>
       </div>
 
-      <!-- 500円相談バナーを支払い前でも見えるようにpaidContentの外に移動 -->
-      <div class="consult-focus-box" id="consult-cta-area">
-        <p class="section-title">誰にも言えない悩みがある方へ</p>
-        <p class="paid-text">返信が来ない不安、好きな人への気持ちの伝え方、誰にも言えない恋愛のこと。あなたの星座と数秘をもとに、今の状況に合わせて具体的にお答えします。</p>
-
-        <div id="consult-sample-preview" style="margin:20px 0;padding:18px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid rgba(201,168,76,0.2);">
-          <p style="font-size:13px;color:#b4a7d8;letter-spacing:0.1em;margin-bottom:10px;">▸ 相談例</p>
-          <p id="sample-q-text" style="font-size:14px;color:rgba(248,244,237,0.9);line-height:1.85;margin-bottom:12px;"></p>
-          <p style="font-size:13px;color:#b4a7d8;letter-spacing:0.1em;margin-bottom:8px;">▸ アドバイスの一部</p>
-          <div style="position:relative;overflow:hidden;max-height:72px;">
-            <p id="sample-a-text" style="font-size:13px;color:rgba(248,244,237,0.82);line-height:1.9;"></p>
-            <div style="position:absolute;bottom:0;left:0;right:0;height:50px;background:linear-gradient(transparent,rgba(30,18,50,0.95));"></div>
-          </div>
-          <p style="font-size:12px;color:rgba(180,167,216,0.6);margin-top:10px;">── 続きは相談後に届きます</p>
-        </div>
-
-        <div class="consult-divider"><span>☾</span></div>
-        <button class="btn-consult" id="openConsultBtn" type="button">今の気持ちを整理する（500円）</button>
-        <p style="text-align:center;font-size:12px;color:rgba(180,167,216,0.6);margin-top:10px;letter-spacing:0.05em;">カード情報はStripeが管理・暗号化。当サイトには一切保存されません。</p>
-        <p class="privacy-note">入力内容はこの画面上で気持ちを整理するためのものです</p>
-      </div>
-
       <div id="paidContent">
         <p class="section-title">頑張らない生き方</p>
         <div class="paid-box"><p class="paid-text" id="paid-life"></p></div>
@@ -521,6 +499,28 @@ body.font-large { --font-scale: 1.15; }
           <h3 class="deep-consult-title">さらに深く知りたいあなたへ</h3>
           <p class="deep-consult-subtitle">あなたの本当のこと、もっと詳しくお話ししませんか？</p>
           <div class="deep-consult-ornament">✦</div>
+        </div>
+
+        <!-- 500円相談バナー：300円の診断結果が表示された後に見えるようにpaidContent内の末尾に移動 -->
+        <div class="consult-focus-box" id="consult-cta-area">
+          <p class="section-title">誰にも言えない悩みがある方へ</p>
+          <p class="paid-text">返信が来ない不安、好きな人への気持ちの伝え方、誰にも言えない恋愛のこと。あなたの星座と数秘をもとに、今の状況に合わせて具体的にお答えします。</p>
+
+          <div id="consult-sample-preview" style="margin:20px 0;padding:18px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid rgba(201,168,76,0.2);">
+            <p style="font-size:13px;color:#b4a7d8;letter-spacing:0.1em;margin-bottom:10px;">▸ 相談例</p>
+            <p id="sample-q-text" style="font-size:14px;color:rgba(248,244,237,0.9);line-height:1.85;margin-bottom:12px;"></p>
+            <p style="font-size:13px;color:#b4a7d8;letter-spacing:0.1em;margin-bottom:8px;">▸ アドバイスの一部</p>
+            <div style="position:relative;overflow:hidden;max-height:72px;">
+              <p id="sample-a-text" style="font-size:13px;color:rgba(248,244,237,0.82);line-height:1.9;"></p>
+              <div style="position:absolute;bottom:0;left:0;right:0;height:50px;background:linear-gradient(transparent,rgba(30,18,50,0.95));"></div>
+            </div>
+            <p style="font-size:12px;color:rgba(180,167,216,0.6);margin-top:10px;">── 続きは相談後に届きます</p>
+          </div>
+
+          <div class="consult-divider"><span>☾</span></div>
+          <button class="btn-consult" id="openConsultBtn" type="button">今の気持ちを整理する（500円）</button>
+          <p style="text-align:center;font-size:12px;color:rgba(180,167,216,0.6);margin-top:10px;letter-spacing:0.05em;">カード情報はStripeが管理・暗号化。当サイトには一切保存されません。</p>
+          <p class="privacy-note">入力内容はこの画面上で気持ちを整理するためのものです</p>
         </div>
       </div>
     </div>
