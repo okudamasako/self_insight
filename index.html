@@ -1139,6 +1139,34 @@ async function checkPaymentReturn() {
           document.getElementById('paidContent').style.display = 'block';
           const compatSection = document.getElementById('compat-section');
           compatSection.classList.remove('hidden');
+
+          // 自分の情報をセット
+          document.getElementById('compat-person').textContent = `${year}年 ${month}月 ${day}日 生まれ`;
+          const myZodiac = getZodiac(month, day);
+          const myLifePath = getLifePath(year, month, day);
+          document.getElementById('compat-base').textContent = `${myZodiac.name} × 数秘${myLifePath}`;
+
+          // 500円相談結果をsessionStorageから復元してサマリーに表示
+          try {
+            const saved = sessionStorage.getItem('consultResult');
+            if (saved) {
+              const { message, relief } = JSON.parse(saved);
+              const summaryWrap = document.getElementById('compat-consult-summary');
+              const summaryMsg = document.getElementById('compat-summary-message');
+              const summaryReliefWrap = document.getElementById('compat-summary-relief-wrap');
+              const summaryRelief = document.getElementById('compat-summary-relief');
+              if (message && summaryMsg) {
+                summaryMsg.textContent = message;
+                summaryWrap.style.display = 'block';
+              }
+              if (relief && summaryRelief) {
+                summaryRelief.textContent = relief;
+                summaryReliefWrap.style.display = 'block';
+              }
+            }
+          } catch(e) {}
+
+          // compatYear等がある場合（旧フロー互換）は相性結果も表示
           if (meta.compatYear && meta.compatMonth && meta.compatDay) {
             compatYearSel.value = meta.compatYear;
             compatMonthSel.value = meta.compatMonth;
@@ -1150,6 +1178,10 @@ async function checkPaymentReturn() {
               parseInt(meta.compatDay)
             );
           }
+          // 生年月日入力フォームを表示（決済後に相手の生年月日を入力してもらう）
+          const compatSetup = document.getElementById('compat-setup-area');
+          if (compatSetup) compatSetup.style.display = 'block';
+
           compatSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
@@ -1294,6 +1326,11 @@ if (organizeBtn) {
       const { message, relief, showCompat } = await generateConsultMessage(payload);
       outputText.textContent = message;
 
+      // 決済リターン後も参照できるようにsessionStorageに保存
+      try {
+        sessionStorage.setItem('consultResult', JSON.stringify({ message, relief: relief || '' }));
+      } catch(e) {}
+
       // 「少し楽になるために」セクションを表示
       if (relief) {
         reliefText.textContent = relief;
@@ -1312,9 +1349,14 @@ if (organizeBtn) {
     } catch (error) {
       // エラーが起きた場合は、フォールバック関数で入力内容から結果を生成して表示する
       console.error(error);
-      outputText.textContent = buildMessageFallback(payload);
-      reliefText.textContent = buildReliefFallback(payload);
+      const fbMsg = buildMessageFallback(payload);
+      const fbRelief = buildReliefFallback(payload);
+      outputText.textContent = fbMsg;
+      reliefText.textContent = fbRelief;
       reliefSection.style.display = 'block';
+      try {
+        sessionStorage.setItem('consultResult', JSON.stringify({ message: fbMsg, relief: fbRelief }));
+      } catch(e) {}
       output.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } finally {
       // 5. 処理が終わったら、ボタンを元の状態に戻します
@@ -1331,38 +1373,41 @@ if (backToResultBtn) {
   });
 }
 
-// 相性鑑定ボタン（相談結果の下に出るやつ）→ 相性セクションへ誘導
+// 相性鑑定ボタン（相談結果の下に出るやつ）→ 決済ページへ直接遷移
 const compatSuggestBtn = document.getElementById('compatSuggestBtn');
 if (compatSuggestBtn) {
-  compatSuggestBtn.addEventListener('click', function() {
-    // paidContentが非表示なら先に開く
-    document.getElementById('paidContent').style.display = 'block';
-    const compatSection = document.getElementById('compat-section');
-    compatSection.classList.remove('hidden');
-    // 相手情報の表示を更新
-    if (currentDiagnosis) {
-      document.getElementById('compat-person').textContent = document.getElementById('consult-person').textContent;
-      document.getElementById('compat-base').textContent = document.getElementById('consult-base').textContent;
+  compatSuggestBtn.addEventListener('click', async function() {
+    this.disabled = true;
+    this.textContent = '決済ページへ移動中...';
+    try {
+      const res = await fetch('/api/create-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'compat',
+          metadata: {
+            zodiac: currentDiagnosis?.zodiac || '',
+            lifePath: String(currentDiagnosis?.lifePath || ''),
+            year: String(parseInt(yearSel.value)),
+            month: String(parseInt(monthSel.value)),
+            day: String(parseInt(daySel.value))
+            // compatYear/Month/Day は決済後に入力するため送らない
+          }
+        })
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert('決済ページへの移動に失敗しました');
+        this.disabled = false;
+        this.textContent = 'お相手との相性も鑑定できます（300円）';
+      }
+    } catch (e) {
+      alert('エラーが発生しました。もう一度お試しください。');
+      this.disabled = false;
+      this.textContent = 'お相手との相性も鑑定できます（300円）';
     }
-
-    // 500円相談結果をサマリーエリアにコピーして相性画面でも表示する
-    const msgEl = document.getElementById('consult-output-text');
-    const reliefEl = document.getElementById('consult-relief-text');
-    const summaryWrap = document.getElementById('compat-consult-summary');
-    const summaryMsg = document.getElementById('compat-summary-message');
-    const summaryReliefWrap = document.getElementById('compat-summary-relief-wrap');
-    const summaryRelief = document.getElementById('compat-summary-relief');
-
-    if (msgEl && msgEl.textContent.trim()) {
-      summaryMsg.textContent = msgEl.textContent;
-      summaryWrap.style.display = 'block';
-    }
-    if (reliefEl && reliefEl.textContent.trim()) {
-      summaryRelief.textContent = reliefEl.textContent;
-      summaryReliefWrap.style.display = 'block';
-    }
-
-    compatSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 }
 
@@ -1515,6 +1560,8 @@ function resetForm() {
   if (reliefSection) reliefSection.style.display = 'none';
   const reliefText = document.getElementById('consult-relief-text');
   if (reliefText) reliefText.textContent = '';
+  // 相談結果のsessionStorageをクリア
+  try { sessionStorage.removeItem('consultResult'); } catch(e) {}
   // 相性画面の相談サマリーもリセット
   const compatSummary = document.getElementById('compat-consult-summary');
   if (compatSummary) compatSummary.style.display = 'none';
