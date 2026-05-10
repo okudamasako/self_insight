@@ -245,19 +245,19 @@ button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
   display: block;
   width: 100%;
   background: transparent;
-  border: none;
-  color: rgba(180,167,216,0.5);
+  border: 1px solid rgba(180,167,216,0.25);
+  border-radius: 12px;
+  color: rgba(180,167,216,0.65);
   font-family: 'Zen Kaku Gothic New', sans-serif;
-  font-size: calc(13px * var(--font-scale, 1));
-  padding: 10px;
+  font-size: calc(15px * var(--font-scale, 1));
+  padding: 15px;
   cursor: pointer;
-  letter-spacing: 0.1em;
-  margin-top: 6px;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  transition: color 0.2s;
+  letter-spacing: 0.12em;
+  margin-top: 10px;
+  text-align: center;
+  transition: border-color 0.2s, color 0.2s;
 }
-.btn-end:hover { color: rgba(180,167,216,0.8); }
+.btn-end:hover { border-color: rgba(180,167,216,0.5); color: rgba(180,167,216,0.9); }
 .footer-note {
   text-align: center; font-size: calc(13px * var(--font-scale, 1));
   color: rgba(180,167,216,0.58); letter-spacing: 0.08em; margin-top: 32px;
@@ -519,7 +519,6 @@ body.font-large { --font-scale: 1.15; }
         <p class="result-text">・頑張らなくても流れが整いやすい生き方<br>・人間関係で疲れない距離感<br>・仕事やお金との向き合い方<br>・恋愛で無理をしやすい癖<br>・今のあなたに必要な小さな選択</p>
         <button class="btn-paid" id="paidBtn" type="button">さらに詳しく読む（300円）</button>
         <p style="text-align:center;font-size:13px;color:rgba(180,167,216,0.65);margin-top:10px;letter-spacing:0.05em;">カード情報はStripeが管理・暗号化。当サイトには一切保存されません。</p>
-        <button class="btn-end" onclick="location.href='/feedback'">診断を終わりにする</button>
       </div>
 
       <div id="paidContent">
@@ -757,7 +756,9 @@ body.font-large { --font-scale: 1.15; }
       </div>
     </div>
 
+    <p style="text-align:center; font-size:calc(12px * var(--font-scale,1)); color:rgba(180,167,216,0.4); letter-spacing:0.15em; margin-bottom:14px;">── 診断後の行動を選ぶ ──</p>
     <button class="btn-retry" onclick="resetForm()">← 別の生年月日で診断する</button>
+    <button class="btn-end" onclick="location.href='/feedback'">ここで診断を終える</button>
   </div>
 
   <p class="footer-note">※ この診断は娯楽目的のAI生成コンテンツです。医療・法律・投資等の専門判断を代替するものではありません。</p>
