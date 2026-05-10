@@ -601,7 +601,6 @@ body.font-large { --font-scale: 1.15; }
         <p style="font-family:'Noto Serif JP',serif; font-size:calc(14px * var(--font-scale,1)); color:#b4a7d8; letter-spacing:0.1em; margin-bottom:12px;">相手との関係性を、もう少し深く読み解くこともできます</p>
         <button class="btn-paid" id="compatSuggestBtn" type="button" style="margin-top:0;">お相手との関係性を読み解く（300円）</button>
       </div>
-      <button class="btn-copy" id="copyConsultBtn" type="button">✦ この結果をコピーする</button>
       <button class="btn-secondary" id="backToResultBtn" type="button">← 診断結果に戻る</button>
     </div>
 
@@ -686,7 +685,6 @@ body.font-large { --font-scale: 1.15; }
           <p style="font-size:11px;color:rgba(180,167,216,0.55);margin-top:8px;">カード情報はStripeが管理・暗号化。当サイトには一切保存されません。</p>
         </div>
       </div>
-      <button class="btn-copy" id="copyCompatBtn" type="button">✦ この結果をコピーする</button>
       <button class="btn-secondary" id="backFromCompatBtn" type="button" style="margin-top:14px;">← 診断結果に戻る</button>
 
       <!-- ★ 相性診断後の「さらに詳しく相談」専用フォーム＋結果エリア ★ -->
@@ -728,11 +726,19 @@ body.font-large { --font-scale: 1.15; }
       </div>
     </div>
 
-    <button class="btn-copy" id="copyResultBtn" type="button">✦ この結果をコピーする</button>
     <button class="btn-retry" onclick="resetForm()">← 別の生年月日で診断する</button>
   </div>
 
   <p class="footer-note">※ この診断は娯楽目的のAI生成コンテンツです。医療・法律・投資等の専門判断を代替するものではありません。</p>
+</div>
+
+<!-- 固定コピーバー：結果表示中のみ表示 -->
+<div id="copy-bar" style="display:none; position:fixed; bottom:0; left:0; right:0; z-index:100; padding:12px 20px 16px; background:linear-gradient(to top, rgba(20,12,36,0.97) 80%, transparent); backdrop-filter:blur(8px);">
+  <div style="max-width:820px; margin:0 auto;">
+    <button id="copyAllBtn" type="button" style="width:100%; background:rgba(201,168,76,0.12); border:1px solid rgba(201,168,76,0.45); border-radius:10px; color:#c9a84c; font-family:'Zen Kaku Gothic New',sans-serif; font-size:calc(14px * var(--font-scale,1)); padding:12px; cursor:pointer; letter-spacing:0.12em; transition:background 0.2s, border-color 0.2s;">
+      ✦ 結果をすべてコピーする
+    </button>
+  </div>
 </div>
 
 <script>
@@ -970,6 +976,7 @@ function showResult(year, month, day) {
 
   document.getElementById('form-section').classList.add('hidden');
   document.getElementById('result-section').classList.remove('hidden');
+  showCopyBar();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -2215,44 +2222,35 @@ function buildReliefFallback(payload) {
   return lines.filter(Boolean).join('\n\n').trim();
 }
 
-// ─── コピー機能 ───────────────────────────────────────────────
-
-/**
- * ボタンを一時的に「コピーしました」表示に変え、2秒後に戻す
- */
-function setCopyFeedback(btn, success) {
-  const original = btn.textContent;
-  btn.textContent = success ? '✓ コピーしました' : 'コピーできませんでした';
-  btn.disabled = true;
-  setTimeout(() => {
-    btn.textContent = original;
-    btn.disabled = false;
-  }, 2000);
-}
-
-async function copyText(text, btn) {
-  try {
-    await navigator.clipboard.writeText(text);
-    setCopyFeedback(btn, true);
-  } catch(e) {
-    setCopyFeedback(btn, false);
-  }
-}
+// ─── コピー機能（全結果一括） ──────────────────────────────────
 
 function getText(id) {
   const el = document.getElementById(id);
   return el ? (el.textContent || el.value || '').trim() : '';
 }
 
-// 基本診断結果コピー
-const copyResultBtn = document.getElementById('copyResultBtn');
-if (copyResultBtn) {
-  copyResultBtn.addEventListener('click', function() {
+function setCopyFeedback(btn, success) {
+  const original = btn.textContent;
+  btn.textContent = success ? '✓ コピーしました' : 'コピーできませんでした';
+  btn.disabled = true;
+  setTimeout(() => { btn.textContent = original; btn.disabled = false; }, 2500);
+}
+
+// コピーバーの表示／非表示（診断結果が出たら表示）
+function showCopyBar() { document.getElementById('copy-bar').style.display = 'block'; }
+function hideCopyBar() { document.getElementById('copy-bar').style.display = 'none'; }
+
+// 「結果をすべてコピーする」— 現在表示されているすべてのテキストを収集
+const copyAllBtn = document.getElementById('copyAllBtn');
+if (copyAllBtn) {
+  copyAllBtn.addEventListener('click', async function() {
     const parts = [];
 
-    // 無料診断部分
+    // ── 基本診断 ──
     const title = getText('r-title');
-    if (title) parts.push(`【${title}】`);
+    if (title) parts.push(`◆ ${title}`);
+    const el = getText('r-element');
+    if (el) parts.push(el);
     const msg = getText('r-message');
     if (msg) parts.push(`▍ 基本性格\n${msg}`);
     const strength = getText('r-strength');
@@ -2262,7 +2260,7 @@ if (copyResultBtn) {
     const advice = getText('r-advice');
     if (advice) parts.push(`▍ 今のあなたへ\n${advice}`);
 
-    // 有料診断部分（表示されている場合のみ）
+    // ── 有料診断（表示中のみ）──
     const paidContent = document.getElementById('paidContent');
     if (paidContent && paidContent.style.display !== 'none') {
       const life = getText('paid-life');
@@ -2275,45 +2273,52 @@ if (copyResultBtn) {
       if (love) parts.push(`▍ 恋愛で無理をしないために\n${love}`);
     }
 
-    copyText(parts.join('\n\n'), this);
-  });
-}
+    // ── 相談結果（表示中のみ）──
+    const consultOut = document.getElementById('consult-output');
+    if (consultOut && consultOut.style.display !== 'none') {
+      const cmsg = getText('consult-output-text');
+      if (cmsg) parts.push(`▍ 今のあなたへ\n${cmsg}`);
+      const crelief = getText('consult-relief-text');
+      if (crelief) parts.push(`▍ 少し楽になるために\n${crelief}`);
+    }
 
-// 相談結果コピー
-const copyConsultBtn = document.getElementById('copyConsultBtn');
-if (copyConsultBtn) {
-  copyConsultBtn.addEventListener('click', function() {
-    const parts = [];
-    const msg = getText('consult-output-text');
-    if (msg) parts.push(`▍ 今のあなたへ\n${msg}`);
-    const relief = getText('consult-relief-text');
-    if (relief) parts.push(`▍ 少し楽になるために\n${relief}`);
-    if (!parts.length) return;
-    copyText(parts.join('\n\n'), this);
-  });
-}
+    // ── 相性診断結果（表示中のみ）──
+    const compatResult = document.getElementById('compat-result');
+    if (compatResult && !compatResult.classList.contains('hidden')) {
+      const pair = getText('compat-pair-label');
+      if (pair) parts.push(`◆ ${pair}`);
+      const compat = getText('compat-text');
+      if (compat) parts.push(`▍ 相手との相性\n${compat}`);
+      const gap = getText('compat-gap-text');
+      if (gap) parts.push(`▍ すれ違いやすいポイント\n${gap}`);
+      const how = getText('compat-how-text');
+      if (how) parts.push(`▍ よりよく関わるために\n${how}`);
+    }
 
-// 相性結果コピー
-const copyCompatBtn = document.getElementById('copyCompatBtn');
-if (copyCompatBtn) {
-  copyCompatBtn.addEventListener('click', function() {
-    const parts = [];
-    const pair = getText('compat-pair-label');
-    if (pair) parts.push(`【${pair}】`);
-    const compat = getText('compat-text');
-    if (compat) parts.push(`▍ 相手との相性\n${compat}`);
-    const gap = getText('compat-gap-text');
-    if (gap) parts.push(`▍ すれ違いやすいポイント\n${gap}`);
-    const how = getText('compat-how-text');
-    if (how) parts.push(`▍ よりよく関わるために\n${how}`);
-    if (!parts.length) return;
-    copyText(parts.join('\n\n'), this);
+    // ── 相性後の相談結果（表示中のみ）──
+    const ccOut = document.getElementById('compat-consult-output');
+    if (ccOut && ccOut.style.display !== 'none') {
+      const ccmsg = getText('compat-consult-output-text');
+      if (ccmsg) parts.push(`▍ 今のあなたへ\n${ccmsg}`);
+      const ccrelief = getText('compat-consult-relief-text');
+      if (ccrelief) parts.push(`▍ 少し楽になるために\n${ccrelief}`);
+    }
+
+    if (!parts.length) { setCopyFeedback(this, false); return; }
+
+    try {
+      await navigator.clipboard.writeText(parts.join('\n\n'));
+      setCopyFeedback(this, true);
+    } catch(e) {
+      setCopyFeedback(this, false);
+    }
   });
 }
 
 function resetForm() {
   document.getElementById('result-section').classList.add('hidden');
   document.getElementById('form-section').classList.remove('hidden');
+  hideCopyBar();
   document.getElementById('loading-area').classList.add('hidden');
   document.getElementById('btn-diagnose').disabled = false;
   document.getElementById('paidBtn').disabled = false;
