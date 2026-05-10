@@ -1132,6 +1132,9 @@ async function checkPaymentReturn() {
           const zodiac = getZodiac(month, day);
           const lifePath = getLifePath(year, month, day);
           document.getElementById('consult-base').textContent = `${zodiac.name} × 数秘${lifePath}`;
+          // 決済済みのため「今の気持ちを整理する（500円）」バナーを非表示
+          const ctaArea = document.getElementById('consult-cta-area');
+          if (ctaArea) ctaArea.style.display = 'none';
           consultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
