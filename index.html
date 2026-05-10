@@ -1304,9 +1304,12 @@ async function checkPaymentReturn() {
               parseInt(meta.compatDay)
             );
           }
-          // 生年月日入力フォームを表示（決済後に相手の生年月日を入力してもらう）
-          const compatSetup = document.getElementById('compat-setup-area');
-          if (compatSetup) compatSetup.style.display = 'block';
+          // 相性結果がまだ表示されていない場合のみ、生年月日入力フォームを表示
+          // （showCompatResultが呼ばれた場合はその中でフォームを非表示にするため上書きしない）
+          if (!meta.compatYear || !meta.compatMonth || !meta.compatDay) {
+            const compatSetup = document.getElementById('compat-setup-area');
+            if (compatSetup) compatSetup.style.display = 'block';
+          }
           // 決済済みのため「今の気持ちを整理する（500円）」バナーを非表示
           const ctaAreaCompat = document.getElementById('consult-cta-area');
           if (ctaAreaCompat) ctaAreaCompat.style.display = 'none';
