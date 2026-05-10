@@ -1491,6 +1491,9 @@ if (organizeBtn) {
       // AIが判定した相性ボタン表示フラグをそのまま使う
       document.getElementById('compat-suggest').style.display = showCompat ? 'block' : 'none';
 
+      // 結果表示後はボタンを非表示にして再送信を防ぐ
+      this.style.display = 'none';
+
       // 結果が見やすいように画面をスクロールさせます
       output.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } catch (error) {
@@ -1504,11 +1507,14 @@ if (organizeBtn) {
       try {
         sessionStorage.setItem('consultResult', JSON.stringify({ message: fbMsg, relief: fbRelief }));
       } catch(e) {}
+
+      // 結果表示後はボタンを非表示にして再送信を防ぐ
+      this.style.display = 'none';
+
       output.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } finally {
-      // 5. 処理が終わったら、ボタンを元の状態に戻します
+      // disabled のみ解除（ボタン自体の表示は結果表示時に非表示済み）
       this.disabled = false;
-      this.textContent = '気持ちを整理する';
     }
   });
 }
@@ -1828,6 +1834,9 @@ function resetForm() {
   document.getElementById('compat-result').classList.add('hidden');
   document.getElementById('consult-output').style.display = 'none';
   document.getElementById('compat-suggest').style.display = 'none';
+  // organizeBtn を再表示（次回使えるように）
+  const organizeBtn = document.getElementById('organizeBtn');
+  if (organizeBtn) { organizeBtn.style.display = ''; organizeBtn.disabled = false; }
   // reliefセクションもリセット
   const reliefSection = document.getElementById('consult-relief-section');
   if (reliefSection) reliefSection.style.display = 'none';
