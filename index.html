@@ -608,20 +608,40 @@ body.font-large { --font-scale: 1.15; }
       </div>
 
       <div id="compat-result" class="hidden" style="margin-top:28px;">
-        <div style="text-align:center;margin-bottom:20px;">
-          <p style="font-size:13px;color:#b4a7d8;margin-bottom:6px;" id="compat-pair-label"></p>
-          <p style="font-family:'Noto Serif JP',serif;font-size:38px;color:#e8d08a;line-height:1;" id="compat-score-num"></p>
-          <p style="font-size:13px;color:#b4a7d8;margin-top:4px;">/ 100</p>
-          <div style="background:rgba(255,255,255,0.08);border-radius:4px;height:6px;margin:12px auto;max-width:260px;overflow:hidden;">
-            <div id="compat-bar" style="height:100%;border-radius:4px;background:linear-gradient(90deg,#c9a84c,#e8829a);transition:width 0.8s ease;width:0%;"></div>
+
+        <!-- ペアラベル -->
+        <div style="text-align:center; margin-bottom:24px;">
+          <p id="compat-pair-label" style="font-family:'Noto Serif JP',serif; font-size:calc(15px * var(--font-scale,1)); color:#b4a7d8; letter-spacing:0.16em;"></p>
+        </div>
+
+        <!-- 相手との相性 -->
+        <div style="margin-bottom:20px;">
+          <p style="font-family:'Noto Serif JP',serif; font-size:calc(16px * var(--font-scale,1)); color:#c9a84c; letter-spacing:0.18em; margin-bottom:14px; display:flex; align-items:center; gap:8px;">
+            <span style="display:block;width:20px;height:1px;background:#c9a84c;flex-shrink:0;"></span>相手との相性
+          </p>
+          <div class="advice-box">
+            <p class="advice-text" id="compat-text"></p>
           </div>
         </div>
-        <div class="advice-box" style="margin-bottom:16px;">
-          <p class="advice-text" id="compat-text"></p>
+
+        <!-- すれ違いやすいポイント -->
+        <div style="margin-bottom:20px;">
+          <p style="font-family:'Noto Serif JP',serif; font-size:calc(16px * var(--font-scale,1)); color:#c9a84c; letter-spacing:0.18em; margin-bottom:14px; display:flex; align-items:center; gap:8px;">
+            <span style="display:block;width:20px;height:1px;background:#c9a84c;flex-shrink:0;"></span>すれ違いやすいポイント
+          </p>
+          <div class="advice-box">
+            <p class="advice-text" id="compat-gap-text"></p>
+          </div>
         </div>
-        <div class="advice-box">
-          <p style="font-size:13px;color:#b4a7d8;letter-spacing:0.1em;margin-bottom:6px;">▸ すれ違いやすいポイント</p>
-          <p class="advice-text" id="compat-gap-text"></p>
+
+        <!-- よりよく関わるために -->
+        <div style="margin-bottom:28px;">
+          <p style="font-family:'Noto Serif JP',serif; font-size:calc(16px * var(--font-scale,1)); color:#c9a84c; letter-spacing:0.18em; margin-bottom:14px; display:flex; align-items:center; gap:8px;">
+            <span style="display:block;width:20px;height:1px;background:#c9a84c;flex-shrink:0;"></span>よりよく関わるために
+          </p>
+          <div class="advice-box">
+            <p class="advice-text" id="compat-how-text"></p>
+          </div>
         </div>
 
         <div style="margin-top:28px;padding:22px;border-radius:15px;background:rgba(232,130,154,0.08);border:1px solid rgba(232,130,154,0.35);text-align:center;">
@@ -1064,20 +1084,123 @@ if (backFromCompatBtn) {
   });
 }
 
-// 相性計算ロジック
-function getCompatScore(s1, s2) {
-  const compatTable = [
-    { signs: ['牡羊座','獅子座'], score: 88, compat: '情熱と行動力が共鳴するペアです。一緒にいると自然にエネルギーが高まり、前向きな気持ちになれます。', gap: 'どちらも主導権を取りたがる傾向があるため、意見がぶつかると激しくなりがちです。' },
-    { signs: ['蟹座','魚座'], score: 86, compat: '感受性の豊かさが似ているため、言葉にしなくても気持ちが通じ合える場面が多いでしょう。', gap: 'ふたりとも傷つくことを恐れるため、本音を言い出せずにすれ違うことがあります。' },
-    { signs: ['乙女座','山羊座'], score: 82, compat: '価値観や生活リズムが合いやすく、安心して一緒にいられる関係です。地に足のついた絆が育まれます。', gap: 'ふたりとも感情を表に出しにくいため、気持ちの確認が少なくなりやすいです。' },
-    { signs: ['天秤座','水瓶座'], score: 84, compat: '知的な会話と自由な空気を共有できるペアです。お互いの個性を尊重できます。', gap: 'どちらも決断を先延ばしにしやすく、大事な局面で動けないことがあります。' },
-    { signs: ['牡牛座','蠍座'], score: 74, compat: '引き合う磁力のような関係です。深いところで惹かれ合い、一度つながると強い絆になります。', gap: '価値観の違いが表れると意地の張り合いになりやすいです。' },
-  ];
-  for (const c of compatTable) {
-    if ((c.signs[0] === s1 && c.signs[1] === s2) || (c.signs[0] === s2 && c.signs[1] === s1)) return c;
+// 相性テキスト生成
+// relType: 'romance'（恋愛・好意）| 'partner'（交際・夫婦）| 'affair'（不倫・曖昧）
+//           'friend'（友人）| 'workplace'（職場）| 'family'（家族）
+//           'dislike'（苦手・嫌い・距離を置きたい）| 'unknown'（不明）
+function getCompatTexts(s1, s2, relType) {
+  // 星座の元素グループ
+  const elements = {
+    火: ['牡羊座','獅子座','射手座'],
+    地: ['牡牛座','乙女座','山羊座'],
+    風: ['双子座','天秤座','水瓶座'],
+    水: ['蟹座','蠍座','魚座']
+  };
+  function getElement(s) {
+    for (const [el, signs] of Object.entries(elements)) {
+      if (signs.includes(s)) return el;
+    }
+    return null;
   }
-  const hash = (s1 + s2).split('').reduce((a, c) => a + c.charCodeAt(0), 0);
-  return { score: 65 + (hash % 26), compat: '異なる個性を持つふたりです。時間をかけるほどに相手の良さが見えてきます。', gap: 'コミュニケーションのスタイルが違うため、意図が伝わりにくい場面がありそうです。' };
+  const el1 = getElement(s1);
+  const el2 = getElement(s2);
+  const sameElement = el1 && el1 === el2;
+  const complementary = (el1==='火'&&el2==='風')||(el1==='風'&&el2==='火')||
+                        (el1==='地'&&el2==='水')||(el1==='水'&&el2==='地');
+  const challenging  = (el1==='火'&&el2==='水')||(el1==='水'&&el2==='火')||
+                       (el1==='地'&&el2==='風')||(el1==='風'&&el2==='地');
+
+  // 元素の特性テキスト
+  const elDesc = {
+    火: '直感と情熱で動く',
+    地: '現実的で安定を求める',
+    風: '頭で考え変化を好む',
+    水: '感情と感受性で関わる'
+  };
+
+  // ─── 星座ペア別の特別テキスト ───
+  const pairKey = [s1, s2].sort().join('×');
+  const pairData = {
+    '牡羊座×獅子座': {
+      compat: `${s1}と${s2}は、どちらも火のエネルギーを持ち、互いの熱量が共鳴しやすい組み合わせです。一緒にいると自然と前向きな空気になり、何かを始めようとする意欲が高まる関係性です。\nただ、その熱さが似ているぶん、相手のテンションや意見に自分が引っ張られやすく、どちらが主導権を持つかという無意識の緊張が生じることもあります。\n言葉にしなくても伝わる場面が多い半面、「言わなくてもわかるはず」という甘えがすれ違いを生む場合もあります。お互いが「自分のほうがわかっている」と思いやすいため、実は細かい認識のズレが積み重なっていることがあります。`,
+      gap: `どちらも自分のペースで動きたい性質があるため、相手の行動に「遅い」「違う」と感じる瞬間が出やすいです。特に意見が割れたとき、どちらも引かない構えになりやすく、感情的になるよりも「なぜそう思うか」を言葉にする余裕が関係を保つ鍵になります。\n感情表現は似ているようで、${s1}は瞬発的に外に出すタイプ、${s2}はプライドが絡むと内側に溜めることがあります。この違いが、タイミングのズレを生むことがあります。`,
+      how_romance: `急かしすぎず、相手が「自分から動きたい」と思えるような余白を作ることが大切です。相手の行動を待てる側が、関係を長く保ちやすくなります。自分の熱量をそのまま全部出さず、少し間を置く習慣が関係の安定に繋がります。`,
+      how_other: `役割や立場を明確にしておくと、摩擦が減ります。どちらかが一方的にリードしようとすると反発が生まれやすいため、対等な立場として関わる意識が関係を安定させます。`
+    },
+    '蟹座×魚座': {
+      compat: `${s1}と${s2}はともに水のエレメントを持ち、感情の動き方が似ています。言葉にしなくても空気で伝わる場面が多く、相手が何を感じているかを察するのが早いため、「わかってもらえた」という安心感が生まれやすい関係です。\n感受性の似た者同士は、共鳴しやすい反面、相手の感情の揺れを自分のことのように受け取ってしまうこともあります。どちらかが落ち込んでいると、もう一方も影響を受けやすいという特徴があります。\n傷つくことへの恐れが似ているため、本音を言い出せずにいる場面が生まれやすいです。`,
+      gap: `ふたりとも「察してほしい」という気持ちが強いため、どちらも言わないまま待ち続けるという状況になりやすいです。「なぜ気づいてくれないのか」という不満が溜まっていても、それを言葉にするのが難しいのがこの組み合わせの難しさです。\n感情を直接ぶつけることへの抵抗感があるため、問題が小さいうちに話し合えずに放置されやすいです。`,
+      how_romance: `察し合う力があるぶん、言葉にしなくても通じていると感じやすいですが、大切なことほど言葉で確認することが安心感を深めます。「言わなくてもわかる」より「言ったから確認できた」という積み重ねが、この関係を育てます。`,
+      how_other: `お互いの感情的な消耗に気をつけることが大切です。相手の気分に引っ張られすぎないよう、自分の感情と相手の感情を分けて受け取る意識を持つと、長く安定した関係が続きます。`
+    },
+    '乙女座×山羊座': {
+      compat: `${s1}と${s2}はともに地のエレメントを持ち、現実的で安定を重視する価値観が近いです。派手さより着実さを好み、お互いの誠実さを自然と信頼できる関係性です。\n生活リズムや仕事に対する姿勢が似ているため、一緒にいてストレスが少なく、安心して過ごせる空気が生まれやすいです。感情的な衝突より、論理的に話し合える場面が多いのもこの組み合わせの特徴です。\nただ、安定しすぎるがゆえに、気持ちの確認や感情的な関わりが少なくなっていくことがあります。`,
+      gap: `ふたりとも感情を表に出すことへの抵抗感が強く、「言わなくてもわかるはず」という思い込みが生じやすいです。実際には相手が何を感じているかを確認せずに進んでしまうため、気持ちのズレが静かに蓄積されることがあります。\nどちらも批判的な視点を持つため、相手の行動に対して内心では評価が生まれやすいですが、それが言葉になると傷つけることも。`,
+      how_romance: `「わかり合えている」という前提を疑ってみることが大切です。定期的に「最近どう？」と聞ける関係を意識すると、積み重なる前に気持ちを確認できます。`,
+      how_other: `共通の目標や役割を共有しやすい組み合わせです。感情面より実務的な協力関係として捉えると、お互いの力を発揮しやすくなります。`
+    },
+    '天秤座×水瓶座': {
+      compat: `${s1}と${s2}はともに風のエレメントを持ち、知的な会話や自由な空気を好みます。お互いの個性を尊重し合える関係で、「この人といると頭が動く」という感覚が生まれやすいです。\nどちらも人間関係において一定の距離感を保つことを好むため、密着しすぎず、でも必要なときに繋がれるという心地よい空気が生まれやすいです。\n押しつけがましさがないぶん、表面的にはスムーズに見えますが、深いところの本音はお互いにあまり出さないまま関係が進む傾向があります。`,
+      gap: `どちらも決断を先延ばしにしやすく、大事な局面でなかなか動けないことがあります。お互いに「相手が決めてくれるだろう」という気持ちがあると、ずっと宙ぶらりんになります。\n知的には理解し合えても、感情面では「何を感じているか」を話し合う機会が少ないため、心の距離は縮まりにくいことがあります。`,
+      how_romance: `明確な言葉で「こうしたい」を伝えることへの抵抗感があるかもしれませんが、あいまいなままにしておくと関係が進まないことが多いです。少しだけ踏み込む言葉が関係を動かします。`,
+      how_other: `議論や意見交換は得意な組み合わせです。感情的な話より、論点を整理しながら話すと、関係がスムーズになります。`
+    },
+    '牡牛座×蠍座': {
+      compat: `${s1}と${s2}は正反対の位置にある星座で、強く引き合う磁力のような引力があります。深いところで惹かれ合い、一度関係が築かれると離れにくい絆になりやすいです。\nどちらも表面的な付き合いより、深く関わることに価値を見出す性質があります。浅い関係では満足できないため、お互いに「本当のこと」を求め合う空気が自然と生まれます。\nただ、深く関わるほど、お互いのこだわりや価値観のぶつかりも大きくなります。`,
+      gap: `どちらも意地を張りやすく、一度すれ違うと双方が「自分は間違っていない」という構えになりやすいです。謝ることや折れることへの抵抗感が強いため、問題が長引きやすいです。\nお金・物・関係に対する「所有感」が双方に強く出ることがあり、それが衝突の火種になる場面もあります。`,
+      how_romance: `「深く関わりたい」という気持ちは同じでも、タイミングやペースが違うことがあります。相手を急かさず、相手のペースを観察する余裕が関係を育てます。`,
+      how_other: `一度信頼が壊れると修復に時間がかかる組み合わせです。誠実さを積み重ねることが、長い付き合いの土台になります。`
+    }
+  };
+
+  // ─── ペア別特別データがある場合 ───
+  if (pairData[pairKey]) {
+    const d = pairData[pairKey];
+    const isRomance = relType === 'romance' || relType === 'partner' || relType === 'affair';
+    return {
+      compat: d.compat,
+      gap: d.gap,
+      how: isRomance ? d.how_romance : d.how_other
+    };
+  }
+
+  // ─── 元素関係ベースのデフォルトテキスト ───
+  let compat, gap, how_romance, how_other;
+
+  if (sameElement) {
+    compat = `${s1}と${s2}はどちらも${el1}のエレメントを持ちます。同じ質のエネルギーが流れているため、物事の感じ方や動き方に共通点が多く、「なんとなくわかる」という感覚が生まれやすいです。\n同じ方向性を持つぶん、初めから違和感が少なく、一緒にいることに安心感を感じやすい組み合わせです。${elDesc[el1]}という姿勢が似ているため、価値観の大きなぶつかりは起きにくいです。\nただし、似ているからこそ「わかってもらえて当然」という甘えが生まれやすく、相手に対する確認や言葉での共有が減りがちになることがあります。同じ特性を持つがゆえに、相手の苦手な部分が自分の鏡のように映ることもあります。`;
+    gap = `似ているがゆえに、お互いの弱点も同じ場所にあることが多いです。たとえば、ふたりとも決断が遅かったり、ふたりとも感情を溜め込みやすかったりする場合、問題が浮かび上がりにくく、積み重なってから噴き出すことがあります。\n「同じはずなのに伝わらない」という違和感は、この組み合わせに特有の体験です。似ているからこそ、ほんの少しのズレが「なぜ？」という疑問に変わりやすいです。相手に期待しすぎないこと、自分と相手を切り離して見る視点が関係を安定させます。`;
+    how_romance = `似た者同士だからこそ、少し違う視点や刺激をお互いに持ち込めると、関係に新鮮さが生まれます。「わかってもらえる安心感」を大切にしながら、言葉での確認もこまめに。`;
+    how_other = `共通点が多いため協力しやすい組み合わせです。ただ、同じ苦手を持つ場合はカバーし合えないため、それぞれが補完できる役割を意識すると関係がスムーズです。`;
+  } else if (complementary) {
+    compat = `${s1}（${el1}）と${s2}（${el2}）は、互いに補い合う元素の組み合わせです。一方が得意なことを他方が苦手としていることが多く、自然と「この人といると助かる」「自分にない部分を持っている」という感覚が生まれやすいです。\nどちらかがエネルギーを出しているとき、もう一方がそれを受け取ったり補ったりする流れが生まれやすく、役割分担が自然と生じる関係性です。\n違いがあるぶん、相手のことを「なぜそう動くのか」と不思議に感じる場面もありますが、それがこの組み合わせの面白さでもあります。`;
+    gap = `感じ方や動き方が違うため、同じ出来事に対して全く異なる反応をすることがあります。一方が「なぜそんなに気にするのか」と思う場面で、もう一方は深刻に受け取っていることがあります。\nどちらが正しいという問題ではなく、受け取り方の構造が違うため、「そっちの見え方があるのか」と一歩引いて見る視点が、すれ違いを防ぐ鍵になります。伝え方を合わせる努力が、この組み合わせの関係を育てます。`;
+    how_romance = `違いを楽しめる段階になると、この関係は豊かさを増します。相手の反応を「変だ」と思う前に、「そういう見方があるのか」と受け取れると、関係が深まりやすいです。`;
+    how_other = `互いの違いを活かした役割分担ができると、この組み合わせは力を発揮します。相手のやり方をそのまま変えようとせず、違うアプローチとして尊重することが長い付き合いの土台になります。`;
+  } else {
+    compat = `${s1}と${s2}は、異なる個性と質を持つ組み合わせです。すぐに共鳴し合うというより、時間をかけるほどに相手の別の側面が見えてくる関係性です。\n最初は「なんだか違う」と感じる場面もあるかもしれませんが、それはどちらかが間違っているのではなく、単純に見え方や動き方の構造が違うということです。\n${el1}の質を持つ${s1}と、${el2}の質を持つ${s2}は、それぞれに強さを持っています。その違いが摩擦になる場面もありますが、相手のやり方を観察することで、自分の見えていなかった部分が見えてくることもあります。`;
+    gap = `コミュニケーションのスタイルや、物事の優先順位が異なりやすい組み合わせです。一方が重要視していることを、もう一方があまり気にしていないという場面が出てきやすいです。\n悪意があるわけではなく、見えている景色が違うため起きるすれ違いです。「なぜそうするのか」と責める前に、「どういう意図でそうしているのか」を一度聞いてみることが、この関係のすれ違いを減らします。放置すると小さな不満が積み重なりやすいため、定期的に話す機会を持つことが大切です。`;
+    how_romance = `急いで距離を縮めようとするより、少しずつ相手のことを知っていく余裕を持つと関係が安定します。違いに戸惑う場面こそ、相手を知るチャンスです。`;
+    how_other = `全部わかり合おうとしなくていいです。必要なところだけ丁寧に関わり、合わない部分は距離として保つことが、この組み合わせの安定した関わり方です。`;
+  }
+
+  // 関係タイプ別の「よりよく関わるために」
+  let how;
+  if (relType === 'romance' || relType === 'partner' || relType === 'affair') {
+    how = how_romance;
+  } else if (relType === 'dislike') {
+    how = `無理に仲良くしようとしなくていいです。「苦手」という感覚は、あなたの本音であり、それを否定する必要はありません。\n大切なのは、相手に対して消耗しすぎない距離感を保つことです。相手の言動に反応しすぎず、関わりを必要最低限に抑えることが、自分を守る一番のやり方です。\n境界線を引くことは冷たいことではありません。自分のエネルギーをどこに使うかを選ぶ、正当な判断です。`;
+  } else if (relType === 'workplace') {
+    how = `職場での関係は、全部わかり合う必要はありません。必要な会話と不要な感情消耗を分けて考えることが、長く安定して関わるための鍵です。\n相手に期待しすぎず、役割として関わることを意識すると、ストレスが減ります。感情的な摩擦が生じたとき、それが「この人への感情」なのか「状況への感情」なのかを分けて考えると、対応の選択肢が広がります。`;
+  } else if (relType === 'family') {
+    how = `家族という関係は、選べないからこそ難しさがあります。全部わかり合おうとしないことが、この関係を長く続けるための現実的な選択です。\n距離を置くことを「逃げ」ではなく「自分を保つための選択」として扱ってみてください。必要な会話と、不要な感情消耗を切り分けることが、消耗を減らします。`;
+  } else if (relType === 'friend') {
+    how = `友人関係では、合わせすぎないことが関係を長持ちさせます。お互いの違いを「そういう人だ」として受け取れると、無用な摩擦が減ります。\n期待しすぎず、でも必要なときには頼れる距離感を意識すると、友人として長く繋がりやすくなります。`;
+  } else {
+    how = how_other;
+  }
+
+  return { compat, gap, how };
 }
 
 // 決済完了後の処理（URLパラメータを確認して自動復元）
@@ -1215,40 +1338,57 @@ async function checkPaymentReturn() {
 function showCompatResult(tYear, tMonth, tDay) {
   const myZodiac = currentDiagnosis?.zodiac;
   if (!myZodiac) return;
-  
-  // 相手の星座を特定します
+
   const targetZodiac = getZodiac(tMonth, tDay);
-  
-  // 二人の星座から相性スコアとメッセージを計算します
-  const result = getCompatScore(myZodiac, targetZodiac.name);
-  
-  // 計算した結果を画面の各要素にセットします
+
+  // 相談内容から関係タイプを判定
+  function detectRelType() {
+    // sessionStorage の worry を参照
+    let worry = '';
+    try {
+      const saved = sessionStorage.getItem('consultResult');
+      // worry は consultResult には入っていないので、ページ内から取得
+      const worryEl = document.getElementById('consult-worry');
+      if (worryEl) worry = worryEl.value;
+    } catch(e) {}
+    if (!worry) worry = '';
+    if (/不倫|浮気|既婚|妻|夫|奥さん|旦那|二股|秘密/.test(worry))            return 'affair';
+    if (/別れ|復縁|元(カレ|カノ|彼)|付き合っ|交際|彼氏|彼女/.test(worry))    return 'partner';
+    if (/嫌い|苦手|むかつ|腹が立|関わりたくない|距離を置|消耗|疲れる人/.test(worry)) return 'dislike';
+    if (/職場|上司|同僚|部下|仕事上|取引/.test(worry))                         return 'workplace';
+    if (/親|母|父|家族|兄弟|姉妹|義母|義父|子ども/.test(worry))               return 'family';
+    if (/友達|友人|親友/.test(worry))                                           return 'friend';
+    if (/好き|気になる|惹かれ|告白|片思|恋/.test(worry))                       return 'romance';
+    return 'unknown';
+  }
+  const relType = detectRelType();
+
+  // テキスト生成
+  const texts = getCompatTexts(myZodiac, targetZodiac.name, relType);
+
+  // ペアラベル
   document.getElementById('compat-pair-label').textContent = `${myZodiac} × ${targetZodiac.name}`;
-  document.getElementById('compat-score-num').textContent = result.score;
-  document.getElementById('compat-bar').style.width = result.score + '%';
-  document.getElementById('compat-text').textContent = result.compat;
-  document.getElementById('compat-gap-text').textContent = result.gap;
-  
-  // 相性診断の結果エリアを表示状態にします
+
+  // 3セクション表示
+  document.getElementById('compat-text').textContent     = texts.compat;
+  document.getElementById('compat-gap-text').textContent = texts.gap;
+  document.getElementById('compat-how-text').textContent = texts.how;
+
+  // 結果エリアを表示
   document.getElementById('compat-result').classList.remove('hidden');
-  
-  // 【今回の修正】相性診断結果が表示された後は、重複する購入導線を非表示にします
-  // 1. 「今の気持ちを整理する」CTAブロック全体を非表示
+
+  // 重複する購入導線を非表示
   const consultCta = document.getElementById('consult-cta-area');
   if (consultCta) consultCta.style.display = 'none';
-  
-  // 2. 相談結果の下に表示される相性診断への誘導エリアを非表示
   const compatSuggest = document.getElementById('compat-suggest');
   if (compatSuggest) compatSuggest.style.display = 'none';
-  
-  // 3. 相性診断の入力フォーム（生年月日入力欄など）を非表示
   const compatSetup = document.getElementById('compat-setup-area');
   if (compatSetup) compatSetup.style.display = 'none';
-  
-  // 相性結果に基づいた詳細相談の案内文を更新します
+
+  // 相性結果に基づいた詳細相談の案内文を更新
   const cDesc = document.getElementById('compat-consult-desc');
   if (cDesc) {
-    cDesc.textContent = `${myZodiac}のあなたと${targetZodiac.name}のあの人。二人の星の配置をさらに深く読み解き、具体的な関係性のアドバイスをお届けします。`;
+    cDesc.textContent = `${myZodiac}のあなたと${targetZodiac.name}のあの人。ふたりの関係性をさらに深く読み解き、具体的な関わり方のアドバイスをお届けします。`;
   }
 }
 
