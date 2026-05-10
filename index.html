@@ -554,6 +554,19 @@ body.font-large { --font-scale: 1.15; }
         <textarea id="consult-hope" class="form-input form-textarea" placeholder="例：少し休めたら、誰かにわかってもらえたら、決めなくてよくなったら"></textarea>
       </div>
       <button class="btn-primary" id="organizeBtn" type="button">気持ちを整理する</button>
+
+      <!-- 自傷・希死念慮検知時の安全案内ブロック -->
+      <div id="safety-block" style="display:none; margin-top:20px; padding:22px 24px; border-radius:14px; background:rgba(180,167,216,0.08); border:1px solid rgba(180,167,216,0.3);">
+        <p style="font-family:'Noto Serif JP',serif; font-size:calc(16px * var(--font-scale,1)); color:#c9a9e0; letter-spacing:0.14em; margin-bottom:14px;">まず、ここにいてください</p>
+        <p style="font-size:calc(15px * var(--font-scale,1)); color:rgba(248,244,237,0.88); line-height:2.0; margin-bottom:18px;">今すぐ全部を解決しなくて大丈夫です。<br>まずは、一人で抱え込まず、誰かに話してください。<br>身近な人に話しづらいときは、匿名で相談できる窓口があります。</p>
+        <div style="background:rgba(255,255,255,0.04); border-radius:10px; padding:16px 18px; font-size:calc(14px * var(--font-scale,1)); color:rgba(248,244,237,0.82); line-height:2.2;">
+          <p style="margin-bottom:6px;">・<strong style="color:#c9a9e0;">よりそいホットライン</strong>　24時間対応<br>　<a href="tel:0120279338" style="color:#b4a7d8; text-decoration:none;">0120-279-338</a></p>
+          <p style="margin-bottom:6px;">・<strong style="color:#c9a9e0;">いのちの電話</strong><br>　<a href="https://www.inochinodenwa.org/" target="_blank" style="color:#b4a7d8;">https://www.inochinodenwa.org/</a></p>
+          <p style="margin-bottom:0;">・<strong style="color:#c9a9e0;">こころの健康相談統一ダイヤル</strong><br>　<a href="tel:0570064556" style="color:#b4a7d8; text-decoration:none;">0570-064-556</a></p>
+        </div>
+        <p style="font-size:calc(13px * var(--font-scale,1)); color:rgba(180,167,216,0.75); margin-top:14px; line-height:1.8;">緊急性が高い場合は、<strong>119</strong>または地域の救急・医療機関に連絡してください。</p>
+      </div>
+
       <div id="consult-output" class="consult-output">
         <p class="consult-output-title">今のあなたへ</p>
         <p class="consult-output-text" id="consult-output-text"></p>
@@ -1500,6 +1513,84 @@ function showCompatResult(tYear, tMonth, tDay) {
   }
 }
 
+/**
+ * 自傷・希死念慮の検出。
+ * Claude API で意味判定（半角カタカナ・ローマ字・伏せ字・遠回し表現を含む）。
+ * API失敗時は正規表現フォールバックで最低限カバー。
+ */
+async function detectCrisis(worry, feeling) {
+  const text = (worry || '') + ' ' + (feeling || '');
+
+  // ── 正規表現フォールバック（API失敗時・高速プレチェック）──
+  function regexCheck(t) {
+    // 半角カタカナを全角に変換してからチェック
+    const normalized = t.replace(/[\uff61-\uff9f]/g, c =>
+      String.fromCharCode(c.charCodeAt(0) - 0xFEE0)
+    );
+    const patterns = [
+      // 全角・ひらがな
+      /死に(たい|たくなる|そう)/,
+      /死(ぬ|んで)(しまい|たい|もいい|方法|を考え)/,
+      /消え(たい|てしまい|てもいい)/,
+      /自殺|自傷|希死/,
+      /リストカット|リスカ/,
+      /いなく(なり|なって)(たい|しまい|もいい)/,
+      /終わり(にし|たい|にしたい)/,
+      /生き(たくない|ていたくない|ている意味がない|る意味がない)/,
+      /生きる(意味|価値|理由)(が|は)(ない|わからない)/,
+      /もう(消えたい|死にたい|終わりにしたい)/,
+      /首(を吊|を絞)|飛び(降り|込み)/,
+      /薬を(大量|いっぱい|たくさん)飲/,
+      // 伏せ字・記号混入（〇す、○す、し〇たい など）
+      /[死しシ][にニ][たタ][いイ]/,
+      /[〇○◯0０][すスSs]/,
+      /[こコk][ろロ][すスs]/,
+      /[きキk][えエe][たタt][いイi]/,
+      // ローマ字（代表的なもの）
+      /shi\s*ni\s*tai/i,
+      /ki\s*e\s*tai/i,
+      /ji\s*sa\s*tsu/i,
+      /ko\s*ro\s*su/i,
+      /shi\s*n\s*de/i,
+      /ina\s*ku\s*na\s*ri/i,
+    ];
+    return patterns.some(p => p.test(normalized));
+  }
+
+  // 正規表現で確実に引っかかるものは即 true
+  if (regexCheck(text)) return true;
+
+  // ── Claude API で意味判定 ──
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 5,
+        system: `あなたは安全判定AIです。以下の相談文に、自傷・自殺・希死念慮・命の危険につながる意図が含まれているかを判定してください。
+
+【noにする例（比喩・誇張・慣用表現）】
+「死ぬほど好き」「嬉しくて死ぬ」「尊すぎて死ぬ」「ヤバすぎて死ねる」「働きすぎて死にそう」などは no。
+
+【yesにする例（実際の希死念慮・自傷意図）】
+実際に死にたい・消えたい・生きたくない・死ぬ方法を探している・もう終わりにしたい・自傷したい、またはそれに相当する表現（半角カタカナ・ローマ字・伏せ字・遠回しな表現を含む）が含まれる場合は yes。
+
+「yes」または「no」のみ返してください。他の文字は一切出力しないでください。`,
+        messages: [{ role: 'user', content: text }]
+      })
+    });
+    if (response.ok) {
+      const data = await response.json();
+      const answer = (data.content?.[0]?.text || '').trim().toLowerCase();
+      return answer === 'yes';
+    }
+  } catch(e) {
+    // API失敗時は正規表現結果（false）をそのまま返す
+  }
+  return false;
+}
+
 const CONSULT_API_ENDPOINT = '/api/consult';
 
 /**
@@ -1569,6 +1660,13 @@ if (organizeBtn) {
     const reliefSection = document.getElementById('consult-relief-section');
     const reliefText = document.getElementById('consult-relief-text');
 
+    // 希死念慮・自傷が検知された場合は安全案内ブロックを最上部に表示
+    const safetyBlock = document.getElementById('safety-block');
+    if (safetyBlock) {
+      const isCrisis = await detectCrisis(payload.worry, payload.feeling);
+      safetyBlock.style.display = isCrisis ? 'block' : 'none';
+    }
+
     output.style.display = 'block';
     outputText.textContent = 'あなたの言葉を読み取りながら、気持ちを整理しています...';
     reliefSection.style.display = 'none';
@@ -1599,8 +1697,10 @@ if (organizeBtn) {
       // 結果表示後はボタンを非表示にして再送信を防ぐ
       this.style.display = 'none';
 
-      // 結果が見やすいように画面をスクロールさせます
-      output.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // 危機検知時は安全ブロックへ、それ以外は結果エリアへスクロール
+      const scrollTarget = (safetyBlock && safetyBlock.style.display === 'block')
+        ? safetyBlock : output;
+      scrollTarget.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } catch (error) {
       // エラーが起きた場合は、フォールバック関数で入力内容から結果を生成して表示する
       console.error(error);
@@ -1619,7 +1719,9 @@ if (organizeBtn) {
       // 結果表示後はボタンを非表示にして再送信を防ぐ
       this.style.display = 'none';
 
-      output.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const scrollTargetErr = (safetyBlock && safetyBlock.style.display === 'block')
+        ? safetyBlock : output;
+      scrollTargetErr.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } finally {
       // disabled のみ解除（ボタン自体の表示は結果表示時に非表示済み）
       this.disabled = false;
@@ -2094,6 +2196,9 @@ function resetForm() {
   document.getElementById('compat-result').classList.add('hidden');
   document.getElementById('consult-output').style.display = 'none';
   document.getElementById('compat-suggest').style.display = 'none';
+  // 安全案内ブロックをリセット
+  const safetyBlock = document.getElementById('safety-block');
+  if (safetyBlock) safetyBlock.style.display = 'none';
   // organizeBtn を再表示（次回使えるように）
   const organizeBtn = document.getElementById('organizeBtn');
   if (organizeBtn) { organizeBtn.style.display = ''; organizeBtn.disabled = false; }
