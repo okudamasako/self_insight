@@ -1368,7 +1368,9 @@ async function checkPaymentReturn() {
           const ctaAreaCompat = document.getElementById('consult-cta-area');
           if (ctaAreaCompat) ctaAreaCompat.style.display = 'none';
 
-          compatSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          // 生年月日入力フォームにスクロール（「ふたりの相性を見る」の入力欄へ直接案内）
+          const scrollToSetup = document.getElementById('compat-setup-area');
+          (scrollToSetup || compatSection).scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
         if (type === 'compatConsult') {
