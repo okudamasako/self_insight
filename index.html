@@ -1551,8 +1551,8 @@ if (organizeBtn) {
         sessionStorage.setItem('consultResult', JSON.stringify({ message, relief: finalRelief }));
       } catch(e) {}
 
-      // AIが判定した相性ボタン表示フラグをそのまま使う
-      document.getElementById('compat-suggest').style.display = showCompat ? 'block' : 'none';
+      // 相性CTA表示判定（APIの判定を優先しつつ、同じ基準で検証）
+      document.getElementById('compat-suggest').style.display = judgeShowCompat(payload.worry) ? 'block' : 'none';
 
       // 結果表示後はボタンを非表示にして再送信を防ぐ
       this.style.display = 'none';
@@ -1570,6 +1570,9 @@ if (organizeBtn) {
       try {
         sessionStorage.setItem('consultResult', JSON.stringify({ message: fbMsg, relief: fbRelief }));
       } catch(e) {}
+
+      // 相性CTA表示判定
+      document.getElementById('compat-suggest').style.display = judgeShowCompat(payload.worry) ? 'block' : 'none';
 
       // 結果表示後はボタンを非表示にして再送信を防ぐ
       this.style.display = 'none';
@@ -1632,6 +1635,77 @@ if (compatSuggestBtn) {
 // 相談結果フォールバック生成（APIが返せない場合のクライアント側処理）
 // consult.js と同じタイプ判定ロジックを使用。
 // ─────────────────────────────────────────────────────────────
+
+/**
+ * 相性診断CTA（「お相手との相性も鑑定できます」）を表示するか判定する。
+ *
+ * 表示する条件：「相手との関係性・距離感・感情の噛み合わなさ」を読み解きたい相談。
+ * 表示しない条件：単なる愚痴・行動への一時的な不満・関係性分析が主目的でない相談。
+ * 人物が登場するだけで true にしない。文章全体の意図で判断する。
+ */
+function judgeShowCompat(worry) {
+  if (!worry) return false;
+  const w = worry;
+
+  // ── 明確に「関係性を読み解きたい」シグナル ──────────────────
+  const positivePatterns = [
+    // 気持ちの読み合い・相性不安
+    /相手の(気持ち|本音|考え|心|思い)/,
+    /気持ち(を|が)(知り|わかり|読み|伝わ|確かめ)/,
+    /なぜ(噛み合|わかって|伝わら|うまくいか)/,
+    /相性(が|は|の)(不安|気になる|悪い|わからない)/,
+    // 距離感・関係の変化への悩み
+    /距離(感|を置|が縮|が開|が変わ)/,
+    /(最近|急に|なんか|どこか)(冷め|変わ|よそよそ|避け|距離)/,
+    /関係(が|を|の)(壊れ|変わ|修復|改善|戻し|どうにか)/,
+    // 感情の温度差・すれ違い
+    /温度差|すれ違|噛み合わ|ちぐはぐ/,
+    /(一方的|片方だけ|自分だけ)(が|に)(好き|好意|依存|求め)/,
+    // 好き・嫌いだけど切れない
+    /好き(だけど|なのに)(苦し|つらい|うまくいかない|離れられ)/,
+    /嫌い(だけど|なのに)(離れられ|切れ|関わら(ざるを得|なければ))/,
+    /(切り(捨て|離し)|縁を切|離れ)たい(けど|のに|が)/,
+    // 関係への消耗・依存
+    /関係(に|で)(消耗|疲れ|悩|苦しい)/,
+    /執着|依存|忘れられ|頭から離れ/,
+    // 告白・恋愛・性的
+    /告白|片思|好意|惹かれ|恋|セックス|性的|身体的/,
+    // 復縁・別れの関係性整理
+    /復縁|別れ(た後|てから)|元(カレ|カノ|彼)/,
+    // 不倫・複雑な関係
+    /不倫|浮気|二股|秘密の関係/,
+    // 嫉妬・独占
+    /嫉妬|やきもち|独占/,
+  ];
+
+  // ── 「関係性分析ではない」シグナル（これが強ければ false ）──────
+  const negativePatterns = [
+    // 身体・衛生の不満
+    /口臭|体臭|臭い|くさい|汗臭/,
+    // マナー・行動への単発不満
+    /(マナー|態度|言い方)(が|は)(悪い|最悪|むかつく|嫌)/,
+    /(うるさい|騒がしい|声が大きい)(だけ|だけど|のが困)/,
+    /(遅刻|ルーズ|だらし(ない|なさ))(ばかり|が多い|で困)/,
+    // 仕事量・業務上の不満
+    /(仕事|業務|タスク)(を|が)(押しつ|多すぎ|やらな|サボ)/,
+    /(残業|仕事量|負担)(が|を)(多い|増え|押しつ)/,
+    // 一時的なイライラ・愚痴
+    /^(.{0,30})(うるさい|むかつく|最悪|ありえ|信じられ)(.{0,20})$/,
+  ];
+
+  // ネガティブパターンが強く一致 かつ ポジティブパターンが一切ない → false
+  const hasNegative = negativePatterns.some(p => p.test(w));
+  const hasPositive = positivePatterns.some(p => p.test(w));
+  if (hasNegative && !hasPositive) return false;
+
+  // ポジティブパターンに一致 → true
+  if (hasPositive) return true;
+
+  // どちらにも一致しない場合：worryType が関係性系なら true
+  const type = detectWorryType(w);
+  return ['romance_general','confession','jealousy','obsession','breakup',
+          'no_reply','affair','sexual','loneliness'].includes(type);
+}
 
 function detectWorryType(w) {
   if (!w) return 'general';
