@@ -1421,8 +1421,8 @@ async function checkPaymentReturn() {
             if (formBase) formBase.textContent = `${zodiacForCompat.name} × 数秘${lifePathForCompat}`;
           }
 
-          // 相性結果の先頭にスクロール（結果→フォームの流れで自然に読み進められる）
-          document.getElementById('compat-result').scrollIntoView({ behavior: 'smooth', block: 'start' });
+          // 専用フォームにスクロール（相性結果の下にある入力欄へ直接案内）
+          document.getElementById('compat-consult-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
       }));
     }
