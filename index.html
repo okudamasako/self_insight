@@ -519,6 +519,7 @@ body.font-large { --font-scale: 1.15; }
         <p class="result-text">・頑張らなくても流れが整いやすい生き方<br>・人間関係で疲れない距離感<br>・仕事やお金との向き合い方<br>・恋愛で無理をしやすい癖<br>・今のあなたに必要な小さな選択</p>
         <button class="btn-paid" id="paidBtn" type="button">さらに詳しく読む（300円）</button>
         <p style="text-align:center;font-size:13px;color:rgba(180,167,216,0.65);margin-top:10px;letter-spacing:0.05em;">カード情報はStripeが管理・暗号化。当サイトには一切保存されません。</p>
+        <button class="btn-end" onclick="location.href='/feedback'" style="margin-top:8px;">ここで診断を終える</button>
       </div>
 
       <div id="paidContent">
@@ -559,6 +560,7 @@ body.font-large { --font-scale: 1.15; }
           <div class="consult-divider"><span>☾</span></div>
           <button class="btn-consult" id="openConsultBtn" type="button">今の気持ちを整理する（500円）</button>
           <p style="text-align:center;font-size:12px;color:rgba(180,167,216,0.6);margin-top:10px;letter-spacing:0.05em;">カード情報はStripeが管理・暗号化。当サイトには一切保存されません。</p>
+          <button class="btn-end" onclick="location.href='/feedback'" style="margin-top:8px;">ここで診断を終える</button>
           <p class="privacy-note">入力内容はこの画面上で気持ちを整理するためのものです</p>
         </div>
       </div>
@@ -625,6 +627,7 @@ body.font-large { --font-scale: 1.15; }
       <div id="compat-suggest" style="display:none; margin-top:20px; padding:20px 22px; border-radius:14px; background:rgba(201,168,76,0.07); border:1px solid rgba(201,168,76,0.28); text-align:center;">
         <p style="font-family:'Noto Serif JP',serif; font-size:calc(14px * var(--font-scale,1)); color:#b4a7d8; letter-spacing:0.1em; margin-bottom:12px;">相手との関係性を、もう少し深く読み解くこともできます</p>
         <button class="btn-paid" id="compatSuggestBtn" type="button" style="margin-top:0;">お相手との関係性を読み解く（300円）</button>
+        <button class="btn-end" onclick="location.href='/feedback'" style="margin-top:8px;">ここで診断を終える</button>
       </div>
       <button class="btn-secondary" id="backToResultBtn" type="button">← 診断結果に戻る</button>
     </div>
@@ -664,6 +667,7 @@ body.font-large { --font-scale: 1.15; }
         </div>
         <button class="btn-paid" id="compatBtn" type="button">相性を見る（300円）</button>
         <p style="text-align:center;font-size:12px;color:rgba(180,167,216,0.6);margin-top:10px;letter-spacing:0.05em;">カード情報はStripeが管理・暗号化。当サイトには一切保存されません。</p>
+        <button class="btn-end" onclick="location.href='/feedback'" style="margin-top:8px;">ここで診断を終える</button>
       </div>
 
       <div id="compat-result" class="hidden" style="margin-top:28px;">
@@ -767,12 +771,14 @@ body.font-large { --font-scale: 1.15; }
           <p style="font-family:'Noto Serif JP',serif; font-size:calc(14px * var(--font-scale,1)); color:#b4a7d8; letter-spacing:0.1em; margin-bottom:12px;">この続きをさらに深く読み解きます</p>
           <button class="btn-consult" id="deepenBtn" type="button" style="font-size:calc(16px * var(--font-scale,1));">この続きを深掘りする（500円）</button>
           <p style="font-size:11px;color:rgba(180,167,216,0.55);margin-top:8px;">カード情報はStripeが管理・暗号化。当サイトには一切保存されません。</p>
+          <button class="btn-end" onclick="location.href='/feedback'" style="margin-top:8px;">ここで診断を終える</button>
         </div>
       </div>
     </div>
 
     <div id="action-nav" style="display:none;">
-      <button class="btn-retry" onclick="location.href='/feedback'">← 別の生年月日で診断する</button>
+      <p style="text-align:center; font-size:calc(12px * var(--font-scale,1)); color:rgba(180,167,216,0.4); letter-spacing:0.15em; margin-bottom:14px;">── 診断後の行動を選ぶ ──</p>
+      <button class="btn-retry" onclick="location.href='/feedback'">ここで診断を終える</button>
     </div>
   </div>
 
