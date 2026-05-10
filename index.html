@@ -954,6 +954,7 @@ function startDiagnosis() {
   setTimeout(() => {
     clearInterval(interval);
     showResult(year, month, day);
+    showEndBtn();  // 無料診断完了後に表示
   }, 1600);
 }
 
@@ -1021,7 +1022,6 @@ function showResult(year, month, day) {
   document.getElementById('form-section').classList.add('hidden');
   document.getElementById('result-section').classList.remove('hidden');
   showCopyBar();
-  showEndBtn();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
