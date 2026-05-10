@@ -1080,6 +1080,9 @@ const backFromCompatBtn = document.getElementById('backFromCompatBtn');
 if (backFromCompatBtn) {
   backFromCompatBtn.addEventListener('click', function() {
     document.getElementById('compat-section').classList.add('hidden');
+    // 決済済みのため「さらに詳しく読む（300円）」バナーを非表示
+    const paidBtn = document.getElementById('paidBtn');
+    if (paidBtn) paidBtn.closest('.paid-preview').style.display = 'none';
     document.querySelector('.result-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 }
@@ -1242,8 +1245,8 @@ async function checkPaymentReturn() {
         if (type === 'paid') {
           document.getElementById('paidContent').style.display = 'block';
           const btn = document.getElementById('paidBtn');
-          btn.textContent = '表示中';
-          btn.disabled = true;
+          // 決済済みのためバナーごと非表示
+          if (btn) btn.closest('.paid-preview').style.display = 'none';
           document.getElementById('paidContent').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
@@ -1588,6 +1591,9 @@ if (organizeBtn) {
 const backToResultBtn = document.getElementById('backToResultBtn');
 if (backToResultBtn) {
   backToResultBtn.addEventListener('click', function() {
+    // 決済済みのため「さらに詳しく読む（300円）」バナーを非表示
+    const paidBtn = document.getElementById('paidBtn');
+    if (paidBtn) paidBtn.closest('.paid-preview').style.display = 'none';
     document.querySelector('.result-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 }
