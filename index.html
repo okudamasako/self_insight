@@ -1184,6 +1184,9 @@ async function checkPaymentReturn() {
           // 生年月日入力フォームを表示（決済後に相手の生年月日を入力してもらう）
           const compatSetup = document.getElementById('compat-setup-area');
           if (compatSetup) compatSetup.style.display = 'block';
+          // 決済済みのため「今の気持ちを整理する（500円）」バナーを非表示
+          const ctaAreaCompat = document.getElementById('consult-cta-area');
+          if (ctaAreaCompat) ctaAreaCompat.style.display = 'none';
 
           compatSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
@@ -1196,6 +1199,9 @@ async function checkPaymentReturn() {
           const zodiac = getZodiac(month, day);
           const lifePath = getLifePath(year, month, day);
           document.getElementById('consult-base').textContent = `${zodiac.name} × 数秘${lifePath}`;
+          // 決済済みのため「今の気持ちを整理する（500円）」バナーを非表示
+          const ctaAreaCompatConsult = document.getElementById('consult-cta-area');
+          if (ctaAreaCompatConsult) ctaAreaCompatConsult.style.display = 'none';
           consultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
       }));
