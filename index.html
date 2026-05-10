@@ -652,6 +652,44 @@ body.font-large { --font-scale: 1.15; }
         </div>
       </div>
       <button class="btn-secondary" id="backFromCompatBtn" type="button" style="margin-top:14px;">← 診断結果に戻る</button>
+
+      <!-- ★ 相性診断後の「さらに詳しく相談」専用フォーム＋結果エリア ★ -->
+      <div id="compat-consult-form" style="display:none; margin-top:32px; padding-top:28px; border-top:1px solid rgba(201,168,76,0.18);">
+        <div class="consult-page-header">
+          <h2 class="consult-page-title">あなたの気持ちを整理する</h2>
+          <span class="result-element" id="compat-consult-form-base"></span>
+        </div>
+        <p class="consult-page-lead">相性の結果をふまえて、今の気持ちを少しだけ言葉にしてみてください。</p>
+        <div class="form-group">
+          <label class="form-label">今いちばん気になっていること</label>
+          <textarea id="compat-consult-worry" class="form-input form-textarea" placeholder="例：仕事のこと、人間関係のこと、恋愛のこと、これからのことなど"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">今の気持ちに近いもの</label>
+          <select id="compat-consult-feeling" class="form-input">
+            <option value="">-- 選択してください --</option>
+            <option value="疲れている">疲れている</option>
+            <option value="不安">不安</option>
+            <option value="迷っている">迷っている</option>
+            <option value="寂しい">寂しい</option>
+            <option value="怒っている">怒っている</option>
+            <option value="わからない">わからない</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">どうなったら少し楽になりそうですか？</label>
+          <textarea id="compat-consult-hope" class="form-input form-textarea" placeholder="例：少し休めたら、誰かにわかってもらえたら、決めなくてよくなったら"></textarea>
+        </div>
+        <button class="btn-primary" id="compatConsultOrganizeBtn" type="button">気持ちを整理する</button>
+        <div id="compat-consult-output" class="consult-output" style="display:none;">
+          <p class="consult-output-title">今のあなたへ</p>
+          <p class="consult-output-text" id="compat-consult-output-text"></p>
+          <div id="compat-consult-relief-section" style="display:none; margin-top:28px; padding-top:24px; border-top:1px solid rgba(201,168,76,0.18);">
+            <p class="consult-output-title" style="margin-bottom:16px;">少し楽になるために</p>
+            <div id="compat-consult-relief-text" style="font-size:calc(16px * var(--font-scale,1)); color:rgba(248,244,237,0.88); line-height:2.0; white-space:pre-line;"></div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <button class="btn-retry" onclick="resetForm()">← 別の生年月日で診断する</button>
@@ -1342,7 +1380,6 @@ async function checkPaymentReturn() {
               const cDesc = document.getElementById('compat-consult-desc');
               if (cDesc && consultDesc) cDesc.textContent = consultDesc;
               document.getElementById('compat-result').classList.remove('hidden');
-              // フォームは非表示（決済済み）
               const compatSetup = document.getElementById('compat-setup-area');
               if (compatSetup) compatSetup.style.display = 'none';
               // 「ふたりの関係について相談する」ボタンも非表示（決済済み）
@@ -1371,19 +1408,21 @@ async function checkPaymentReturn() {
             }
           } catch(e) {}
 
-          // consult-section も表示
-          const consultSection = document.getElementById('consult-section');
-          consultSection.classList.remove('hidden');
-          document.getElementById('consult-person').textContent = `${year}年 ${month}月 ${day}日 生まれ`;
-          const zodiac = getZodiac(month, day);
-          const lifePath = getLifePath(year, month, day);
-          document.getElementById('consult-base').textContent = `${zodiac.name} × 数秘${lifePath}`;
           // 決済済みのため各バナーを非表示
           const ctaAreaCompatConsult = document.getElementById('consult-cta-area');
           if (ctaAreaCompatConsult) ctaAreaCompatConsult.style.display = 'none';
 
-          // 相性セクションにスクロール（相性→相談の流れを自然に見せる）
-          compatSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          // compat-section 内の専用フォームを表示
+          const compatConsultForm = document.getElementById('compat-consult-form');
+          if (compatConsultForm) {
+            compatConsultForm.style.display = 'block';
+            // ラベルに星座・数秘をセット
+            const formBase = document.getElementById('compat-consult-form-base');
+            if (formBase) formBase.textContent = `${zodiacForCompat.name} × 数秘${lifePathForCompat}`;
+          }
+
+          // 相性結果の先頭にスクロール（結果→フォームの流れで自然に読み進められる）
+          document.getElementById('compat-result').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
       }));
     }
@@ -1583,6 +1622,65 @@ if (organizeBtn) {
       output.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } finally {
       // disabled のみ解除（ボタン自体の表示は結果表示時に非表示済み）
+      this.disabled = false;
+    }
+  });
+}
+
+// 相性診断後の「気持ちを整理する」ボタン（compat-section 内専用フォーム）
+const compatConsultOrganizeBtn = document.getElementById('compatConsultOrganizeBtn');
+if (compatConsultOrganizeBtn) {
+  compatConsultOrganizeBtn.addEventListener('click', async function() {
+    const worry   = document.getElementById('compat-consult-worry').value.trim();
+    const feeling = document.getElementById('compat-consult-feeling').value;
+    const goal    = document.getElementById('compat-consult-hope').value.trim();
+
+    if (!worry) { alert('今いちばん気になっていることを入力してください'); return; }
+    if (!feeling) { alert('今の気持ちに近いものを選択してください'); return; }
+
+    const payload = {
+      zodiac: currentDiagnosis ? currentDiagnosis.zodiac : '',
+      number: currentDiagnosis ? String(currentDiagnosis.lifePath) : '',
+      worry, feeling, goal
+    };
+
+    const output      = document.getElementById('compat-consult-output');
+    const outputText  = document.getElementById('compat-consult-output-text');
+    const reliefSec   = document.getElementById('compat-consult-relief-section');
+    const reliefText  = document.getElementById('compat-consult-relief-text');
+
+    output.style.display = 'block';
+    outputText.textContent = 'あなたの言葉を読み取りながら、気持ちを整理しています...';
+    reliefSec.style.display = 'none';
+    reliefText.textContent = '';
+
+    this.disabled = true;
+    this.textContent = '整理しています...';
+
+    try {
+      const { message, relief } = await generateConsultMessage(payload);
+      outputText.textContent = message;
+      const finalRelief = relief || buildReliefFallback(payload);
+      reliefText.textContent = finalRelief;
+      reliefSec.style.display = 'block';
+      try {
+        sessionStorage.setItem('consultResult', JSON.stringify({ message, relief: finalRelief }));
+      } catch(e) {}
+      this.style.display = 'none';
+      output.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch (error) {
+      console.error(error);
+      const fbMsg    = buildMessageFallback(payload);
+      const fbRelief = buildReliefFallback(payload);
+      outputText.textContent = fbMsg;
+      reliefText.textContent = fbRelief;
+      reliefSec.style.display = 'block';
+      try {
+        sessionStorage.setItem('consultResult', JSON.stringify({ message: fbMsg, relief: fbRelief }));
+      } catch(e) {}
+      this.style.display = 'none';
+      output.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } finally {
       this.disabled = false;
     }
   });
@@ -2007,6 +2105,21 @@ function resetForm() {
   // 相談結果・相性結果のsessionStorageをクリア
   try { sessionStorage.removeItem('consultResult'); } catch(e) {}
   try { sessionStorage.removeItem('compatResult'); } catch(e) {}
+  // 相性後専用フォームをリセット
+  const compatConsultForm = document.getElementById('compat-consult-form');
+  if (compatConsultForm) compatConsultForm.style.display = 'none';
+  const ccWorry = document.getElementById('compat-consult-worry');
+  if (ccWorry) ccWorry.value = '';
+  const ccFeeling = document.getElementById('compat-consult-feeling');
+  if (ccFeeling) ccFeeling.value = '';
+  const ccHope = document.getElementById('compat-consult-hope');
+  if (ccHope) ccHope.value = '';
+  const ccOutput = document.getElementById('compat-consult-output');
+  if (ccOutput) ccOutput.style.display = 'none';
+  const ccRelief = document.getElementById('compat-consult-relief-section');
+  if (ccRelief) ccRelief.style.display = 'none';
+  const ccOrganizeBtn = document.getElementById('compatConsultOrganizeBtn');
+  if (ccOrganizeBtn) { ccOrganizeBtn.style.display = ''; ccOrganizeBtn.disabled = false; }
   // 相性画面の相談サマリーもリセット
   const compatSummary = document.getElementById('compat-consult-summary');
   if (compatSummary) compatSummary.style.display = 'none';
