@@ -585,7 +585,8 @@ body.font-large { --font-scale: 1.15; }
           <option value="迷っている">迷っている</option>
           <option value="寂しい">寂しい</option>
           <option value="怒っている">怒っている</option>
-          <option value="わからない">わからない</option>
+          <option value="困っている">困っている</option>
+            <option value="わからない">わからない</option>
         </select>
       </div>
       <div class="form-group">
@@ -737,6 +738,7 @@ body.font-large { --font-scale: 1.15; }
             <option value="迷っている">迷っている</option>
             <option value="寂しい">寂しい</option>
             <option value="怒っている">怒っている</option>
+            <option value="困っている">困っている</option>
             <option value="わからない">わからない</option>
           </select>
         </div>
@@ -769,9 +771,9 @@ body.font-large { --font-scale: 1.15; }
       </div>
     </div>
 
-    <p style="text-align:center; font-size:calc(12px * var(--font-scale,1)); color:rgba(180,167,216,0.4); letter-spacing:0.15em; margin-bottom:14px;">── 診断後の行動を選ぶ ──</p>
-    <button class="btn-retry" onclick="resetForm()">← 別の生年月日で診断する</button>
-    <button class="btn-end" id="btnEnd" onclick="location.href='/feedback'" style="display:none;">ここで診断を終える</button>
+    <div id="action-nav" style="display:none;">
+      <button class="btn-retry" onclick="location.href='/feedback'">← 別の生年月日で診断する</button>
+    </div>
   </div>
 
   <p class="footer-note">※ この診断は娯楽目的のAI生成コンテンツです。医療・法律・投資等の専門判断を代替するものではありません。</p>
@@ -955,7 +957,9 @@ function startDiagnosis() {
   setTimeout(() => {
     clearInterval(interval);
     showResult(year, month, day);
-    showEndBtn();  // 無料診断完了後に表示
+    // 無料診断完了：「別の生年月日で診断する」だけ表示（終了ボタンはまだ非表示）
+    const nav = document.getElementById('action-nav');
+    if (nav) nav.style.display = 'block';
   }, 1600);
 }
 
@@ -1367,6 +1371,9 @@ async function checkPaymentReturn() {
 
       // 診断結果を表示
       showResult(year, month, day);
+      // 決済フローでは action-nav を非表示（入力フォームが表示される段階）
+      const actionNav = document.getElementById('action-nav');
+      if (actionNav) actionNav.style.display = 'none';
 
       // DOM描画完了を待ってからスクロール・コンテンツ開放
       requestAnimationFrame(() => requestAnimationFrame(() => {
@@ -2451,8 +2458,14 @@ function setCopyFeedback(btn, success) {
 // コピーバーの表示／非表示（診断結果が出たら表示）
 function showCopyBar() { document.getElementById('copy-bar').style.display = 'block'; }
 function hideCopyBar() { document.getElementById('copy-bar').style.display = 'none'; }
-function showEndBtn()  { const b = document.getElementById('btnEnd'); if (b) b.style.display = 'block'; }
-function hideEndBtn()  { const b = document.getElementById('btnEnd'); if (b) b.style.display = 'none'; }
+function showEndBtn()  {
+  const nav = document.getElementById('action-nav');
+  if (nav) nav.style.display = 'block';
+}
+function hideEndBtn()  {
+  const nav = document.getElementById('action-nav');
+  if (nav) nav.style.display = 'none';
+}
 
 // 「結果をすべてコピーする」— 現在表示されているすべてのテキストを収集
 const copyAllBtn = document.getElementById('copyAllBtn');
