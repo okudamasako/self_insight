@@ -240,6 +240,24 @@ button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 }
 .btn-copy:hover { border-color: rgba(201,168,76,0.6); color: #c9a84c; }
 .btn-copy:disabled { opacity: 0.5; cursor: default; }
+
+.btn-end {
+  display: block;
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: rgba(180,167,216,0.5);
+  font-family: 'Zen Kaku Gothic New', sans-serif;
+  font-size: calc(13px * var(--font-scale, 1));
+  padding: 10px;
+  cursor: pointer;
+  letter-spacing: 0.1em;
+  margin-top: 6px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.2s;
+}
+.btn-end:hover { color: rgba(180,167,216,0.8); }
 .footer-note {
   text-align: center; font-size: calc(13px * var(--font-scale, 1));
   color: rgba(180,167,216,0.58); letter-spacing: 0.08em; margin-top: 32px;
@@ -501,6 +519,7 @@ body.font-large { --font-scale: 1.15; }
         <p class="result-text">・頑張らなくても流れが整いやすい生き方<br>・人間関係で疲れない距離感<br>・仕事やお金との向き合い方<br>・恋愛で無理をしやすい癖<br>・今のあなたに必要な小さな選択</p>
         <button class="btn-paid" id="paidBtn" type="button">さらに詳しく読む（300円）</button>
         <p style="text-align:center;font-size:13px;color:rgba(180,167,216,0.65);margin-top:10px;letter-spacing:0.05em;">カード情報はStripeが管理・暗号化。当サイトには一切保存されません。</p>
+        <button class="btn-end" onclick="location.href='/feedback'">診断を終わりにする</button>
       </div>
 
       <div id="paidContent">
@@ -1420,6 +1439,13 @@ async function checkPaymentReturn() {
         }
 
         if (type === 'compatConsult') {
+          // isDeepen フラグがある場合は深掘りフローへ
+          if (meta.isDeepen === 'true') {
+            type = 'deepen';
+          }
+        }
+
+        if (type === 'compatConsult') {
           document.getElementById('paidContent').style.display = 'block';
 
           // compat-section を表示して相性結果を復元
@@ -1951,13 +1977,14 @@ if (deepenBtn) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          type: 'deepen',
+          type: 'compatConsult',   // バックエンドは compatConsult と同じ決済フロー
           metadata: {
-            zodiac:   currentDiagnosis?.zodiac || '',
-            lifePath: String(currentDiagnosis?.lifePath || ''),
-            year:  String(parseInt(yearSel.value)),
-            month: String(parseInt(monthSel.value)),
-            day:   String(parseInt(daySel.value))
+            zodiac:    currentDiagnosis?.zodiac || '',
+            lifePath:  String(currentDiagnosis?.lifePath || ''),
+            year:      String(parseInt(yearSel.value)),
+            month:     String(parseInt(monthSel.value)),
+            day:       String(parseInt(daySel.value)),
+            isDeepen:  'true'      // リターン時に深掘りフローと判別するフラグ
           }
         })
       });
