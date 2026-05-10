@@ -1676,6 +1676,16 @@ function judgeShowCompat(worry) {
     /不倫|浮気|二股|秘密の関係/,
     // 嫉妬・独占
     /嫉妬|やきもち|独占/,
+    // 嫌い・苦手でも関係性そのものへの強い感情がある
+    /(嫌い|苦手|うざい)(な|で|だ|けど|なので|だから).{0,20}(関わ|一緒|職場|会う|いる)/,
+    /なる(べく|たけ)?(関わり|会わ|話さ)(たくない|ずに済|を避け)/,
+    /距離を(置き|取り|開け)(たい|ている)/,
+    /(一緒にいる|関わる|会う)(と|だけで)(疲れ|消耗|しんど|つらい|苦し)/,
+    /(どこが|何が|なぜ)(こんなに|あんなに|そんなに)?(合わ|噛み合わ|疲れ|消耗|苦し)(ない|のか|んだろ)/,
+    /避け(たい|ている|られない)/,
+    /(関わり|縁)(を|が)(切り|なくし)たい(けど|のに|が)/,
+    /一緒にいると(しんど|つらい|消耗|疲れ)/,
+    /(なぜ|どうして)(この人|あの人|彼|彼女|上司|同僚|友達|親).{0,10}(こんなに|こんなに疲れ|合わ|苦手|嫌)/,
   ];
 
   // ── 「関係性分析ではない」シグナル（これが強ければ false ）──────
@@ -1704,7 +1714,7 @@ function judgeShowCompat(worry) {
   // どちらにも一致しない場合：worryType が関係性系なら true
   const type = detectWorryType(w);
   return ['romance_general','confession','jealousy','obsession','breakup',
-          'no_reply','affair','sexual','loneliness'].includes(type);
+          'no_reply','affair','sexual','loneliness','dislike','anger'].includes(type);
 }
 
 function detectWorryType(w) {
