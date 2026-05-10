@@ -687,6 +687,11 @@ body.font-large { --font-scale: 1.15; }
       </div>
       <button class="btn-secondary" id="backFromCompatBtn" type="button" style="margin-top:14px;">← 診断結果に戻る</button>
 
+      <!-- 過去の深掘り履歴（2回目以降に表示） -->
+      <div id="deepen-history" style="display:none; margin-top:28px; padding-top:24px; border-top:1px solid rgba(201,168,76,0.15);">
+        <p style="font-family:'Noto Serif JP',serif; font-size:calc(13px * var(--font-scale,1)); color:#b4a7d8; letter-spacing:0.12em; margin-bottom:16px;">― これまでの相談履歴 ―</p>
+      </div>
+
       <!-- ★ 相性診断後の「さらに詳しく相談」専用フォーム＋結果エリア ★ -->
       <div id="compat-consult-form" style="display:none; margin-top:32px; padding-top:28px; border-top:1px solid rgba(201,168,76,0.18);">
         <div class="consult-page-header">
@@ -722,6 +727,13 @@ body.font-large { --font-scale: 1.15; }
             <p class="consult-output-title" style="margin-bottom:16px;">少し楽になるために</p>
             <div id="compat-consult-relief-text" style="font-size:calc(16px * var(--font-scale,1)); color:rgba(248,244,237,0.88); line-height:2.0; white-space:pre-line;"></div>
           </div>
+        </div>
+
+        <!-- 深掘りCTA：相談結果が出たら表示 -->
+        <div id="deepen-cta" style="display:none; margin-top:24px; padding:20px 22px; border-radius:14px; background:rgba(201,168,76,0.06); border:1px solid rgba(201,168,76,0.25); text-align:center;">
+          <p style="font-family:'Noto Serif JP',serif; font-size:calc(14px * var(--font-scale,1)); color:#b4a7d8; letter-spacing:0.1em; margin-bottom:12px;">この続きをさらに深く読み解きます</p>
+          <button class="btn-consult" id="deepenBtn" type="button" style="font-size:calc(16px * var(--font-scale,1));">この続きを深掘りする（500円）</button>
+          <p style="font-size:11px;color:rgba(180,167,216,0.55);margin-top:8px;">カード情報はStripeが管理・暗号化。当サイトには一切保存されません。</p>
         </div>
       </div>
     </div>
@@ -1473,6 +1485,86 @@ async function checkPaymentReturn() {
           // 専用フォームにスクロール（相性結果の下にある入力欄へ直接案内）
           document.getElementById('compat-consult-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
+
+        if (type === 'deepen') {
+          document.getElementById('paidContent').style.display = 'block';
+
+          // compat-section を表示
+          const compatSection = document.getElementById('compat-section');
+          compatSection.classList.remove('hidden');
+          document.getElementById('compat-person').textContent = `${year}年 ${month}月 ${day}日 生まれ`;
+          const zodiacD = getZodiac(month, day);
+          const lifePathD = getLifePath(year, month, day);
+          document.getElementById('compat-base').textContent = `${zodiacD.name} × 数秘${lifePathD}`;
+
+          // 相性結果を復元
+          try {
+            const savedCompat = sessionStorage.getItem('compatResult');
+            if (savedCompat) {
+              const { pairLabel, compat, gap, how, consultDesc } = JSON.parse(savedCompat);
+              document.getElementById('compat-pair-label').textContent = pairLabel || '';
+              document.getElementById('compat-text').textContent       = compat || '';
+              document.getElementById('compat-gap-text').textContent   = gap || '';
+              document.getElementById('compat-how-text').textContent   = how || '';
+              const cDesc = document.getElementById('compat-consult-desc');
+              if (cDesc && consultDesc) cDesc.textContent = consultDesc;
+              document.getElementById('compat-result').classList.remove('hidden');
+              const compatSetup = document.getElementById('compat-setup-area');
+              if (compatSetup) compatSetup.style.display = 'none';
+              const compatConsultBtnEl = document.getElementById('compatConsultBtn');
+              if (compatConsultBtnEl) compatConsultBtnEl.closest('div').style.display = 'none';
+            }
+          } catch(e) {}
+
+          // 過去の相談履歴を画面に復元表示
+          let history = [];
+          try { history = JSON.parse(sessionStorage.getItem('deepenHistory') || '[]'); } catch(e) {}
+
+          const historyWrap = document.getElementById('deepen-history');
+          if (historyWrap && history.length > 0) {
+            historyWrap.innerHTML = '';
+            historyWrap.style.display = 'block';
+            history.forEach((h, i) => {
+              const div = document.createElement('div');
+              div.style.cssText = 'margin-bottom:24px; padding:18px; border-radius:12px; background:rgba(255,255,255,0.035); border-left:2px solid rgba(201,168,76,0.35);';
+              div.innerHTML = `
+                <p style="font-family:'Noto Serif JP',serif;font-size:calc(13px * var(--font-scale,1));color:#b4a7d8;letter-spacing:0.1em;margin-bottom:10px;">── 第${i+1}回の相談 ──</p>
+                <p style="font-size:calc(13px * var(--font-scale,1));color:rgba(180,167,216,0.75);margin-bottom:8px;">「${h.worry}」</p>
+                <p style="font-family:'Noto Serif JP',serif;font-size:calc(14px * var(--font-scale,1));color:#e8d08a;margin-bottom:6px;">今のあなたへ</p>
+                <p style="font-size:calc(14px * var(--font-scale,1));color:rgba(248,244,237,0.82);line-height:1.9;white-space:pre-line;margin-bottom:10px;">${h.message}</p>
+                ${h.relief ? `<p style="font-family:'Noto Serif JP',serif;font-size:calc(14px * var(--font-scale,1));color:#e8d08a;margin-bottom:6px;">少し楽になるために</p><p style="font-size:calc(14px * var(--font-scale,1));color:rgba(248,244,237,0.82);line-height:1.9;white-space:pre-line;">${h.relief}</p>` : ''}
+              `;
+              historyWrap.appendChild(div);
+            });
+          }
+
+          // 専用フォームをリセットして再表示（新たな深掘りを入力できるよう）
+          const compatConsultForm = document.getElementById('compat-consult-form');
+          if (compatConsultForm) {
+            compatConsultForm.style.display = 'block';
+            document.getElementById('compat-consult-worry').value = '';
+            document.getElementById('compat-consult-feeling').value = '';
+            document.getElementById('compat-consult-hope').value = '';
+            const ccOutput = document.getElementById('compat-consult-output');
+            if (ccOutput) ccOutput.style.display = 'none';
+            const deepenCta = document.getElementById('deepen-cta');
+            if (deepenCta) deepenCta.style.display = 'none';
+            const ccBtn = document.getElementById('compatConsultOrganizeBtn');
+            if (ccBtn) { ccBtn.style.display = ''; ccBtn.disabled = false; ccBtn.textContent = '気持ちを整理する'; }
+            const formBase = document.getElementById('compat-consult-form-base');
+            if (formBase) formBase.textContent = `${zodiacD.name} × 数秘${lifePathD}`;
+            // タイトルを「深掘り」に更新
+            const roundNum = history.length + 1;
+            const formTitle = compatConsultForm.querySelector('.consult-page-title');
+            if (formTitle) formTitle.textContent = `深掘り相談 第${roundNum}回`;
+          }
+
+          const ctaArea = document.getElementById('consult-cta-area');
+          if (ctaArea) ctaArea.style.display = 'none';
+
+          // フォームにスクロール
+          document.getElementById('compat-consult-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
       }));
     }
   } catch (e) {
@@ -1779,21 +1871,36 @@ if (compatConsultOrganizeBtn) {
     if (!worry) { alert('今いちばん気になっていることを入力してください'); return; }
     if (!feeling) { alert('今の気持ちに近いものを選択してください'); return; }
 
+    // 会話履歴を読み込む
+    let history = [];
+    try { history = JSON.parse(sessionStorage.getItem('deepenHistory') || '[]'); } catch(e) {}
+
+    // 相性結果をコンテキストとして追加
+    const compatResult = {};
+    try {
+      const saved = sessionStorage.getItem('compatResult');
+      if (saved) Object.assign(compatResult, JSON.parse(saved));
+    } catch(e) {}
+
     const payload = {
-      zodiac: currentDiagnosis ? currentDiagnosis.zodiac : '',
-      number: currentDiagnosis ? String(currentDiagnosis.lifePath) : '',
-      worry, feeling, goal
+      zodiac:  currentDiagnosis ? currentDiagnosis.zodiac : '',
+      number:  currentDiagnosis ? String(currentDiagnosis.lifePath) : '',
+      worry, feeling, goal,
+      history,        // 過去の相談履歴
+      compatContext: compatResult  // 相性診断結果
     };
 
     const output      = document.getElementById('compat-consult-output');
     const outputText  = document.getElementById('compat-consult-output-text');
     const reliefSec   = document.getElementById('compat-consult-relief-section');
     const reliefText  = document.getElementById('compat-consult-relief-text');
+    const deepenCta   = document.getElementById('deepen-cta');
 
     output.style.display = 'block';
     outputText.textContent = 'あなたの言葉を読み取りながら、気持ちを整理しています...';
     reliefSec.style.display = 'none';
     reliefText.textContent = '';
+    if (deepenCta) deepenCta.style.display = 'none';
 
     this.disabled = true;
     this.textContent = '整理しています...';
@@ -1804,10 +1911,15 @@ if (compatConsultOrganizeBtn) {
       const finalRelief = relief || buildReliefFallback(payload);
       reliefText.textContent = finalRelief;
       reliefSec.style.display = 'block';
-      try {
-        sessionStorage.setItem('consultResult', JSON.stringify({ message, relief: finalRelief }));
-      } catch(e) {}
+
+      // 今回のやりとりを履歴に追加して保存
+      history.push({ worry, feeling, goal, message, relief: finalRelief });
+      try { sessionStorage.setItem('deepenHistory', JSON.stringify(history)); } catch(e) {}
+      try { sessionStorage.setItem('consultResult', JSON.stringify({ message, relief: finalRelief })); } catch(e) {}
+
       this.style.display = 'none';
+      // 深掘りCTAを表示
+      if (deepenCta) deepenCta.style.display = 'block';
       output.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } catch (error) {
       console.error(error);
@@ -1816,13 +1928,51 @@ if (compatConsultOrganizeBtn) {
       outputText.textContent = fbMsg;
       reliefText.textContent = fbRelief;
       reliefSec.style.display = 'block';
-      try {
-        sessionStorage.setItem('consultResult', JSON.stringify({ message: fbMsg, relief: fbRelief }));
-      } catch(e) {}
+      history.push({ worry, feeling, goal, message: fbMsg, relief: fbRelief });
+      try { sessionStorage.setItem('deepenHistory', JSON.stringify(history)); } catch(e) {}
+      try { sessionStorage.setItem('consultResult', JSON.stringify({ message: fbMsg, relief: fbRelief })); } catch(e) {}
       this.style.display = 'none';
+      if (deepenCta) deepenCta.style.display = 'block';
       output.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } finally {
       this.disabled = false;
+    }
+  });
+}
+
+// 「この続きを深掘りする（500円）」決済ボタン
+const deepenBtn = document.getElementById('deepenBtn');
+if (deepenBtn) {
+  deepenBtn.addEventListener('click', async function() {
+    this.disabled = true;
+    this.textContent = '決済ページへ移動中...';
+    try {
+      const res = await fetch('/api/create-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'deepen',
+          metadata: {
+            zodiac:   currentDiagnosis?.zodiac || '',
+            lifePath: String(currentDiagnosis?.lifePath || ''),
+            year:  String(parseInt(yearSel.value)),
+            month: String(parseInt(monthSel.value)),
+            day:   String(parseInt(daySel.value))
+          }
+        })
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert('決済ページへの移動に失敗しました');
+        this.disabled = false;
+        this.textContent = 'この続きを深掘りする（500円）';
+      }
+    } catch(e) {
+      alert('エラーが発生しました。もう一度お試しください。');
+      this.disabled = false;
+      this.textContent = 'この続きを深掘りする（500円）';
     }
   });
 }
@@ -2340,9 +2490,15 @@ function resetForm() {
   if (reliefSection) reliefSection.style.display = 'none';
   const reliefText = document.getElementById('consult-relief-text');
   if (reliefText) reliefText.textContent = '';
-  // 相談結果・相性結果のsessionStorageをクリア
+  // 相談結果・相性結果・深掘り履歴のsessionStorageをクリア
   try { sessionStorage.removeItem('consultResult'); } catch(e) {}
   try { sessionStorage.removeItem('compatResult'); } catch(e) {}
+  try { sessionStorage.removeItem('deepenHistory'); } catch(e) {}
+  // 深掘りCTAと履歴エリアをリセット
+  const deepenCta = document.getElementById('deepen-cta');
+  if (deepenCta) deepenCta.style.display = 'none';
+  const deepenHistory = document.getElementById('deepen-history');
+  if (deepenHistory) { deepenHistory.style.display = 'none'; deepenHistory.innerHTML = '<p style="font-family:\'Noto Serif JP\',serif; font-size:calc(13px * var(--font-scale,1)); color:#b4a7d8; letter-spacing:0.12em; margin-bottom:16px;">― これまでの相談履歴 ―</p>'; }
   // 相性後専用フォームをリセット
   const compatConsultForm = document.getElementById('compat-consult-form');
   if (compatConsultForm) compatConsultForm.style.display = 'none';

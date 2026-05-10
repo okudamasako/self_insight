@@ -9,7 +9,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { worry, feeling, goal, zodiac, number } = req.body;
+    const { worry, feeling, goal, zodiac, number, history, compatContext } = req.body;
 
     // ─────────────────────────────────────────────────────
     // STEP 1: worry のキーワードから相談タイプを判定
@@ -229,7 +229,26 @@ falseにする条件（関係性分析が主目的ではない相談）：
 }
 `.trim();
 
-    const promptText = `【相談内容】${worry}\n【今の気持ち】${feeling}\n【どうなりたいか】${goal || '（未入力）'}`;
+    // 過去の相談履歴をプロンプトに追加（深掘り時）
+    let historyNote = '';
+    if (Array.isArray(history) && history.length > 0) {
+      historyNote = '\n\n【これまでの相談履歴（文脈として参照してください）】\n';
+      history.forEach((h, i) => {
+        historyNote += `\n─ 第${i+1}回 ─\n`;
+        historyNote += `悩み：${h.worry}\n気持ち：${h.feeling}\n`;
+        historyNote += `回答（今のあなたへ）：${h.message}\n`;
+        if (h.relief) historyNote += `回答（少し楽になるために）：${h.relief}\n`;
+      });
+      historyNote += '\n上記の履歴を踏まえ、今回は「その後」として深掘りしてください。前回と同じことを繰り返さず、一歩進んだ視点で答えてください。';
+    }
+
+    // 相性診断結果をプロンプトに追加
+    let compatNote = '';
+    if (compatContext && compatContext.compat) {
+      compatNote = `\n\n【相性診断の結果（参照情報）】\n相手との相性：${compatContext.compat}\nすれ違いやすいポイント：${compatContext.gap || ''}\nよりよく関わるために：${compatContext.how || ''}`;
+    }
+
+    const promptText = `【相談内容】${worry}\n【今の気持ち】${feeling}\n【どうなりたいか】${goal || '（未入力）'}${compatNote}${historyNote}`;
 
     // ─────────────────────────────────────────────────────
     // STEP 5: OpenAI API 呼び出し
