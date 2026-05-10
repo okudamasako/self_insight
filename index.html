@@ -1839,8 +1839,12 @@ if (organizeBtn) {
       safetyBlock.style.display = isCrisis ? 'block' : 'none';
     }
 
-    output.style.display = 'block';
-    outputText.textContent = 'あなたの言葉を読み取りながら、気持ちを整理しています...';
+    // ローディングスピナー表示（出力エリアより先に）
+    const loadingDots = document.getElementById('consultLoadingDots');
+    if (loadingDots) loadingDots.classList.remove('hidden');
+
+    output.style.display = 'none';
+    outputText.textContent = '';
     reliefSection.style.display = 'none';
     reliefText.textContent = '';
 
@@ -1851,6 +1855,8 @@ if (organizeBtn) {
     // 4. APIと通信して、結果を受け取ります
     try {
       const { message, relief, showCompat } = await generateConsultMessage(payload);
+      if (loadingDots) loadingDots.classList.add('hidden');
+      output.style.display = 'block';
       outputText.textContent = message;
 
       // relief が空ならフォールバックで生成（画面表示と保存を同じ値に統一）
@@ -1879,6 +1885,8 @@ if (organizeBtn) {
       console.error(error);
       const fbMsg = buildMessageFallback(payload);
       const fbRelief = buildReliefFallback(payload);
+      if (loadingDots) loadingDots.classList.add('hidden');
+      output.style.display = 'block';
       outputText.textContent = fbMsg;
       reliefText.textContent = fbRelief;
       reliefSection.style.display = 'block';
@@ -1940,25 +1948,23 @@ if (compatConsultOrganizeBtn) {
     const reliefText  = document.getElementById('compat-consult-relief-text');
     const deepenCta   = document.getElementById('deepen-cta');
 
-    output.style.display = 'block';
-    outputText.textContent = 'あなたの言葉を読み取りながら、気持ちを整理しています...';
+    output.style.display = 'none';
+    outputText.textContent = '';
     reliefSec.style.display = 'none';
     reliefText.textContent = '';
     if (deepenCta) deepenCta.style.display = 'none';
 
-    // ローディングドット表示
+    // ローディングスピナー表示
     const ccDots = document.getElementById('compatConsultLoadingDots');
     if (ccDots) ccDots.classList.remove('hidden');
-
-    // ローディングドット表示
-    const loadingDots = document.getElementById('consultLoadingDots');
-    if (loadingDots) loadingDots.classList.remove('hidden');
 
     this.disabled = true;
     this.textContent = '整理しています...';
 
     try {
       const { message, relief } = await generateConsultMessage(payload);
+      if (ccDots) ccDots.classList.add('hidden');
+      output.style.display = 'block';
       outputText.textContent = message;
       const finalRelief = relief || buildReliefFallback(payload);
       reliefText.textContent = finalRelief;
@@ -1977,6 +1983,8 @@ if (compatConsultOrganizeBtn) {
       console.error(error);
       const fbMsg    = buildMessageFallback(payload);
       const fbRelief = buildReliefFallback(payload);
+      if (ccDots) ccDots.classList.add('hidden');
+      output.style.display = 'block';
       outputText.textContent = fbMsg;
       reliefText.textContent = fbRelief;
       reliefSec.style.display = 'block';
@@ -1988,7 +1996,6 @@ if (compatConsultOrganizeBtn) {
       output.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } finally {
       this.disabled = false;
-      if (ccDots) ccDots.classList.add('hidden');
     }
   });
 }
