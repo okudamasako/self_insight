@@ -1368,9 +1368,12 @@ async function checkPaymentReturn() {
           const ctaAreaCompat = document.getElementById('consult-cta-area');
           if (ctaAreaCompat) ctaAreaCompat.style.display = 'none';
 
-          // 生年月日入力フォームにスクロール（「ふたりの相性を見る」の入力欄へ直接案内）
-          const scrollToSetup = document.getElementById('compat-setup-area');
-          (scrollToSetup || compatSection).scrollIntoView({ behavior: 'smooth', block: 'start' });
+          // 生年月日入力フォームにスクロール（相性結果未表示の場合のみ）
+          if (!meta.compatYear || !meta.compatMonth || !meta.compatDay) {
+            const scrollToSetup = document.getElementById('compat-setup-area');
+            (scrollToSetup || compatSection).scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+          // 相性結果が表示済みの場合は showCompatResult 内でスクロール済み
         }
 
         if (type === 'compatConsult') {
@@ -1513,6 +1516,9 @@ function showCompatResult(tYear, tMonth, tDay) {
   if (cDesc) {
     cDesc.textContent = `${myZodiac}のあなたと${targetZodiac.name}のあの人。ふたりの関係性をさらに深く読み解き、具体的な関わり方のアドバイスをお届けします。`;
   }
+
+  // 相性結果にスクロール
+  document.getElementById('compat-result').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 /**
