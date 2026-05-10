@@ -564,8 +564,8 @@ body.font-large { --font-scale: 1.15; }
         </div>
       </div>
       <div id="compat-suggest" style="display:none; margin-top:20px; padding:20px 22px; border-radius:14px; background:rgba(201,168,76,0.07); border:1px solid rgba(201,168,76,0.28); text-align:center;">
-        <p style="font-family:'Noto Serif JP',serif; font-size:calc(14px * var(--font-scale,1)); color:#b4a7d8; letter-spacing:0.1em; margin-bottom:12px;">相手との関係をさらに深く読み解きます</p>
-        <button class="btn-paid" id="compatSuggestBtn" type="button" style="margin-top:0;">お相手との相性も鑑定できます（300円）</button>
+        <p style="font-family:'Noto Serif JP',serif; font-size:calc(14px * var(--font-scale,1)); color:#b4a7d8; letter-spacing:0.1em; margin-bottom:12px;">相手との関係性を、もう少し深く読み解くこともできます</p>
+        <button class="btn-paid" id="compatSuggestBtn" type="button" style="margin-top:0;">お相手との関係性を読み解く（300円）</button>
       </div>
       <button class="btn-secondary" id="backToResultBtn" type="button">← 診断結果に戻る</button>
     </div>
@@ -1593,8 +1593,8 @@ if (organizeBtn) {
         sessionStorage.setItem('consultResult', JSON.stringify({ message, relief: finalRelief }));
       } catch(e) {}
 
-      // 相性CTA表示判定（APIの判定を優先しつつ、同じ基準で検証）
-      document.getElementById('compat-suggest').style.display = judgeShowCompat(payload.worry) ? 'block' : 'none';
+      // 相談結果表示後は常にCTAを表示
+      document.getElementById('compat-suggest').style.display = 'block';
 
       // 結果表示後はボタンを非表示にして再送信を防ぐ
       this.style.display = 'none';
@@ -1613,8 +1613,8 @@ if (organizeBtn) {
         sessionStorage.setItem('consultResult', JSON.stringify({ message: fbMsg, relief: fbRelief }));
       } catch(e) {}
 
-      // 相性CTA表示判定
-      document.getElementById('compat-suggest').style.display = judgeShowCompat(payload.worry) ? 'block' : 'none';
+      // 相談結果表示後は常にCTAを表示
+      document.getElementById('compat-suggest').style.display = 'block';
 
       // 結果表示後はボタンを非表示にして再送信を防ぐ
       this.style.display = 'none';
@@ -1724,12 +1724,12 @@ if (compatSuggestBtn) {
       } else {
         alert('決済ページへの移動に失敗しました');
         this.disabled = false;
-        this.textContent = 'お相手との相性も鑑定できます（300円）';
+        this.textContent = 'お相手との関係性を読み解く（300円）';
       }
     } catch (e) {
       alert('エラーが発生しました。もう一度お試しください。');
       this.disabled = false;
-      this.textContent = 'お相手との相性も鑑定できます（300円）';
+      this.textContent = 'お相手との関係性を読み解く（300円）';
     }
   });
 }
