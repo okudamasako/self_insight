@@ -594,6 +594,12 @@ body.font-large { --font-scale: 1.15; }
       </div>
       <button class="btn-primary" id="organizeBtn" type="button">気持ちを整理する</button>
 
+      <!-- ローディング（既存スピナーと統一） -->
+      <div class="loading-area hidden" id="consultLoadingDots">
+        <div class="loading-spinner"></div>
+        <p class="loading-text">気持ちを整理しています...</p>
+      </div>
+
       <!-- 自傷・希死念慮検知時の安全案内ブロック -->
       <div id="safety-block" style="display:none; margin-top:20px; padding:22px 24px; border-radius:14px; background:rgba(180,167,216,0.08); border:1px solid rgba(180,167,216,0.3);">
         <p style="font-family:'Noto Serif JP',serif; font-size:calc(16px * var(--font-scale,1)); color:#c9a9e0; letter-spacing:0.14em; margin-bottom:14px;">まず、ここにいてください</p>
@@ -738,6 +744,12 @@ body.font-large { --font-scale: 1.15; }
           <textarea id="compat-consult-hope" class="form-input form-textarea" placeholder="例：少し休めたら、誰かにわかってもらえたら、決めなくてよくなったら"></textarea>
         </div>
         <button class="btn-primary" id="compatConsultOrganizeBtn" type="button">気持ちを整理する</button>
+
+        <!-- ローディング（既存スピナーと統一） -->
+        <div class="loading-area hidden" id="compatConsultLoadingDots">
+          <div class="loading-spinner"></div>
+          <p class="loading-text">気持ちを整理しています...</p>
+        </div>
         <div id="compat-consult-output" class="consult-output" style="display:none;">
           <p class="consult-output-title">今のあなたへ</p>
           <p class="consult-output-text" id="compat-consult-output-text"></p>
@@ -758,7 +770,7 @@ body.font-large { --font-scale: 1.15; }
 
     <p style="text-align:center; font-size:calc(12px * var(--font-scale,1)); color:rgba(180,167,216,0.4); letter-spacing:0.15em; margin-bottom:14px;">── 診断後の行動を選ぶ ──</p>
     <button class="btn-retry" onclick="resetForm()">← 別の生年月日で診断する</button>
-    <button class="btn-end" onclick="location.href='/feedback'">ここで診断を終える</button>
+    <button class="btn-end" id="btnEnd" onclick="location.href='/feedback'" style="display:none;">ここで診断を終える</button>
   </div>
 
   <p class="footer-note">※ この診断は娯楽目的のAI生成コンテンツです。医療・法律・投資等の専門判断を代替するものではありません。</p>
@@ -1009,6 +1021,7 @@ function showResult(year, month, day) {
   document.getElementById('form-section').classList.add('hidden');
   document.getElementById('result-section').classList.remove('hidden');
   showCopyBar();
+  showEndBtn();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -1361,6 +1374,7 @@ async function checkPaymentReturn() {
           const btn = document.getElementById('paidBtn');
           // 決済済みのためバナーごと非表示
           if (btn) btn.closest('.paid-preview').style.display = 'none';
+          showEndBtn();
           document.getElementById('paidContent').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
@@ -1854,6 +1868,7 @@ if (organizeBtn) {
 
       // 結果表示後はボタンを非表示にして再送信を防ぐ
       this.style.display = 'none';
+      showEndBtn();
 
       // 危機検知時は安全ブロックへ、それ以外は結果エリアへスクロール
       const scrollTarget = (safetyBlock && safetyBlock.style.display === 'block')
@@ -1876,6 +1891,7 @@ if (organizeBtn) {
 
       // 結果表示後はボタンを非表示にして再送信を防ぐ
       this.style.display = 'none';
+      showEndBtn();
 
       const scrollTargetErr = (safetyBlock && safetyBlock.style.display === 'block')
         ? safetyBlock : output;
@@ -1883,6 +1899,7 @@ if (organizeBtn) {
     } finally {
       // disabled のみ解除（ボタン自体の表示は結果表示時に非表示済み）
       this.disabled = false;
+      if (loadingDots) loadingDots.classList.add('hidden');
     }
   });
 }
@@ -1929,6 +1946,14 @@ if (compatConsultOrganizeBtn) {
     reliefText.textContent = '';
     if (deepenCta) deepenCta.style.display = 'none';
 
+    // ローディングドット表示
+    const ccDots = document.getElementById('compatConsultLoadingDots');
+    if (ccDots) ccDots.classList.remove('hidden');
+
+    // ローディングドット表示
+    const loadingDots = document.getElementById('consultLoadingDots');
+    if (loadingDots) loadingDots.classList.remove('hidden');
+
     this.disabled = true;
     this.textContent = '整理しています...';
 
@@ -1963,6 +1988,7 @@ if (compatConsultOrganizeBtn) {
       output.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } finally {
       this.disabled = false;
+      if (ccDots) ccDots.classList.add('hidden');
     }
   });
 }
@@ -2417,6 +2443,8 @@ function setCopyFeedback(btn, success) {
 // コピーバーの表示／非表示（診断結果が出たら表示）
 function showCopyBar() { document.getElementById('copy-bar').style.display = 'block'; }
 function hideCopyBar() { document.getElementById('copy-bar').style.display = 'none'; }
+function showEndBtn()  { const b = document.getElementById('btnEnd'); if (b) b.style.display = 'block'; }
+function hideEndBtn()  { const b = document.getElementById('btnEnd'); if (b) b.style.display = 'none'; }
 
 // 「結果をすべてコピーする」— 現在表示されているすべてのテキストを収集
 const copyAllBtn = document.getElementById('copyAllBtn');
@@ -2497,6 +2525,7 @@ function resetForm() {
   document.getElementById('result-section').classList.add('hidden');
   document.getElementById('form-section').classList.remove('hidden');
   hideCopyBar();
+  hideEndBtn();
   document.getElementById('loading-area').classList.add('hidden');
   document.getElementById('btn-diagnose').disabled = false;
   document.getElementById('paidBtn').disabled = false;
